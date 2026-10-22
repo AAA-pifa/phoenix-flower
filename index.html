@@ -99,7 +99,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* Entrance sequence: added without changing the existing map or note storage. */
+/* Entrance sequence */
 #phoenix-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overflow:hidden;background:#18251f;color:#f5efe4;isolation:isolate}
 #phoenix-intro[hidden]{display:none}
 .intro-photos,.intro-shade{position:absolute;inset:0}
@@ -126,6 +126,44 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 #phoenix-intro.leaving{opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s}
 @media(prefers-reduced-motion:reduce){.intro-photo{animation:none;opacity:0;transform:none}.intro-photo:first-child{opacity:1}#phoenix-intro *{transition:none!important;animation:none!important}}
 
+/* Iteration: location index, menu, and bookmark */
+.top-actions{gap:6px}
+.icon-btn.menu-trigger{font-size:20px;font-weight:500}
+.intro-photo{animation:none;opacity:0;transition:opacity .65s ease;transform:scale(1.02)}
+.intro-photo.active{opacity:1;transform:scale(1)}
+.intro-next{border:1px solid rgba(245,239,228,.5);border-radius:999px;background:rgba(245,239,228,.12);color:#fffaf0;min-height:44px;padding:0 22px;font-size:13px;letter-spacing:.05em;backdrop-filter:blur(10px);margin-top:10px;transition:background .2s}
+.intro-next:active{background:rgba(245,239,228,.25)}
+.intro-enter{margin-top:10px}
+.index-field{margin:13px 0}
+.index-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+.index-field select,.index-field input{width:100%;min-height:44px;padding:10px 12px;border:1px solid #e5d9ca;border-radius:12px;background:#fffdf9;color:var(--ink);font:inherit}
+.index-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.place-choice,.menu-item{border:1px solid #e9ddcf;border-radius:14px;background:#fffdf8;color:var(--ink);padding:12px;text-align:left;min-height:58px;display:flex;gap:10px;align-items:center}
+.place-choice:active,.menu-item:active{background:#f4e8d9}
+.place-choice .place-symbol,.menu-symbol{width:34px;height:34px;flex:0 0 34px;border-radius:12px;background:#f2e5d6;display:grid;place-items:center;font-size:17px}
+.place-choice strong,.menu-item strong{display:block;font-size:13px;font-weight:650}
+.place-choice small,.menu-item small{display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:3px}
+.menu-section-title{font-family:"Songti SC",STSong,serif;font-size:14px;color:#a05d42;margin:16px 0 8px}
+.menu-list{display:grid;grid-template-columns:1fr;gap:7px}
+.menu-item{min-height:54px;padding:9px 11px}
+.menu-item .menu-copy{min-width:0;flex:1}
+.menu-item .menu-arrow{color:#a38d7a;font-size:17px}
+.index-note{border-radius:13px;background:#f5ebde;padding:11px 12px;font-size:12px;line-height:1.7;color:#7c6856;margin-top:12px}
+.bookmark-stage{padding:14px;background:#f1e5d4;border-radius:18px;display:flex;justify-content:center}
+.bookmark-card{position:relative;width:min(100%,300px);padding:14px 12px 15px;background:#fff9ee;border:1px solid #e3d2bb;box-shadow:0 10px 25px #59412a14;color:#594b3d;overflow:hidden}
+.bookmark-brand{font-family:"Songti SC",STSong,serif;text-align:center;font-size:15px;letter-spacing:.1em;margin:0 0 10px}
+.bookmark-image-wrap{position:relative;margin:0 17px}
+.bookmark-image{display:block;width:100%;height:245px;object-fit:cover;filter:saturate(.84)}
+.bookmark-vertical{position:absolute;top:0;bottom:0;width:15px;display:flex;flex-direction:column;align-items:center;justify-content:space-around;font-family:"Songti SC",STSong,serif;font-size:12px;color:#8c6e55;text-shadow:0 1px #fff9ee}
+.bookmark-vertical.left{left:-18px}.bookmark-vertical.right{right:-18px}
+.bookmark-overlay-quote{position:absolute;left:0;right:0;bottom:0;padding:28px 7px 9px;background:linear-gradient(transparent,#201a15b8);color:#fffaf0;text-align:center;font-family:"Songti SC",STSong,serif;font-size:14px;line-height:1.6}
+.bookmark-number{text-align:center;font-size:10px;letter-spacing:.12em;color:#97785d;margin:11px 0 5px}
+.bookmark-footer{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;border-top:1px solid #e8dac8;padding-top:9px;font-size:10px;line-height:1.6;color:#89735f}
+.bookmark-footer .footer-message{font-family:"Songti SC",STSong,serif;font-size:12px;color:#68513f;max-width:190px}
+.bookmark-controls{display:flex;gap:8px;margin-top:12px}
+.bookmark-controls button{flex:1}
+@media(max-width:420px){.top-actions #rulesBtn,.top-actions #backupBtn{display:none}.top-actions{gap:5px}.brand{gap:7px}.brand-copy h1{font-size:15px;letter-spacing:.04em}.brand-copy p{font-size:10px}.brand-mark{width:34px;height:34px;font-size:18px}.icon-btn{width:35px;height:35px}}
+@media(max-width:380px){.index-grid{grid-template-columns:1fr}.bookmark-image{height:220px}}
 </style>
 </head>
 <body>
@@ -142,8 +180,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     <p class="intro-copy" id="introCopy">这里有我们走过的路，<br>也有我们一起留下的故事。</p>
     <p class="intro-final" id="introFinal">还记得我们四中特有的「水族馆」吗？</p>
     <div class="intro-brand" id="introBrand">凤凰花开的路口</div>
-    <button class="intro-enter" id="introEnter" type="button">找回我们的青春　→</button>
-    <div class="intro-caption">一些地方，一些故事，还有曾经的我们。</div>
+    <button class="intro-next" id="introNext" type="button">继续往前　→</button>
+    <button class="intro-enter" id="introEnter" type="button">走进校园地图　→</button>
+    <div class="intro-caption" id="introCaption">轻点屏幕，慢慢看完这段序章。</div>
   </div>
 </div>
 
@@ -165,8 +204,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
         </div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn" id="timeIndexBtn" aria-label="时光索引" title="时光索引">◷</button>
+        <button class="icon-btn" id="placeIndexBtn" aria-label="地点索引" title="地点索引">⌖</button>
         <button class="icon-btn" id="rulesBtn" aria-label="查看社区公约" title="社区公约">♡</button>
         <button class="icon-btn" id="backupBtn" aria-label="备份与恢复" title="备份与恢复">↗</button>
+        <button class="icon-btn menu-trigger" id="menuBtn" aria-label="打开菜单" title="更多">☰</button>
       </div>
     </div>
   </header>
@@ -264,6 +306,76 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       <div class="footer-note">如果浏览器存储不可用，请先导出备份，不要清理网站数据。</div>
     </div>
   </div>
+
+  <div class="overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">A PLACE FOR OUR MEMORIES</div><h3 id="menuTitle">把记忆慢慢收好</h3></div><button class="close-btn" data-close="menuOverlay" aria-label="关闭">×</button></div>
+      <div class="menu-section-title">关于与原则</div><div class="menu-list" id="menuAbout"></div>
+      <div class="menu-section-title">发现与珍藏</div><div class="menu-list" id="menuDiscover"></div>
+      <div class="menu-section-title">参与共建</div><div class="menu-list" id="menuBuild"></div>
+      <div class="menu-section-title">联系与保障</div><div class="menu-list" id="menuCare"></div>
+      <div class="modal-actions"><button class="secondary-btn" id="menuRulesBtn">社区公约</button><button class="secondary-btn" id="menuBackupBtn">备份与恢复</button></div>
+      <p class="footer-note">愿每一段青春，都有地方安放。</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="timeOverlay" role="dialog" aria-modal="true" aria-labelledby="timeTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">TIME INDEX · 2018—2118</div><h3 id="timeTitle">时光索引</h3></div><button class="close-btn" data-close="timeOverlay" aria-label="关闭">×</button></div>
+      <p class="panel-copy">从建校记忆出发，按年份或日期寻找旧时光。日期与地点未来可交叉筛选。</p>
+      <div class="index-field"><label for="timeYear">选择年份</label><select id="timeYear"></select></div>
+      <div class="index-field"><label for="timeDate">或选择具体日期</label><input id="timeDate" type="date" min="2018-01-01" max="2118-12-31"></div>
+      <div class="index-field"><label for="timePlace">地点（可与年份／日期组合）</label><select id="timePlace"><option value="all">全部地点</option></select></div>
+      <div class="index-field"><label for="timeKind">记忆类型</label><select id="timeKind"><option value="all">全部记忆</option><option value="photo">照片</option><option value="story">故事</option><option value="event">活动</option></select></div>
+      <div class="modal-actions"><button class="secondary-btn" id="todayMemoryBtn">历年今日</button><button class="primary-btn" id="applyTimeIndex">查看这一时光</button></div>
+      <div class="index-note" id="timeIndexStatus">当前版本尚未接入共享照片库，因此不会展示虚构的历史照片。年份与日期筛选界面已准备好。</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="placeOverlay" role="dialog" aria-modal="true" aria-labelledby="placeTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">CAMPUS PLACE INDEX</div><h3 id="placeTitle">按地点寻找记忆</h3></div><button class="close-btn" data-close="placeOverlay" aria-label="关闭">×</button></div>
+      <p class="panel-copy">选择一个熟悉的地方，地图会带你回到那里。进入地点后可继续浏览该处的记忆。</p>
+      <div class="index-grid" id="placeChoices"></div>
+      <div class="index-note">“全图”可随时回到整个校园。当前地图定位按你提供的校园标注图校准，后续仍可微调。</div>
+      <button class="secondary-btn" id="placeResetBtn" style="width:100%;margin-top:10px">回到全图</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="photoWallOverlay" role="dialog" aria-modal="true" aria-labelledby="photoWallTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">MEMORIES OF THIS PLACE</div><h3 id="photoWallTitle">地点照片墙</h3></div><button class="close-btn" data-close="photoWallOverlay" aria-label="关闭">×</button></div>
+      <p class="panel-copy" id="photoWallDescription">这里的照片会按时间慢慢积累。</p>
+      <div class="index-field"><label for="wallYear">年份筛选</label><select id="wallYear"><option value="all">所有年份</option></select></div>
+      <div class="index-field"><label for="wallDate">具体日期（选填）</label><input id="wallDate" type="date" min="2018-01-01" max="2118-12-31"></div>
+      <div class="index-note" id="photoWallEmpty">这片记忆墙还在等待第一张照片。共享照片库接入后，这里会展示真实投稿，并支持时间与地点组合筛选。</div>
+      <div class="modal-actions"><button class="secondary-btn" id="wallMapBtn">在地图中查看</button><button class="primary-btn" id="wallFilterBtn">应用筛选</button></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="featureOverlay" role="dialog" aria-modal="true" aria-labelledby="featureTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker" id="featureKicker">PHOENIX FLOWER</div><h3 id="featureTitle">项目说明</h3></div><button class="close-btn" data-close="featureOverlay" aria-label="关闭">×</button></div>
+      <div class="read-content" id="featureContent"></div>
+      <div id="featureActions"></div>
+      <button class="secondary-btn" data-close="featureOverlay" style="width:100%;margin-top:10px">返回</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="bookmarkOverlay" role="dialog" aria-modal="true" aria-labelledby="bookmarkTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">A LITTLE MEMENTO</div><h3 id="bookmarkTitle">凤凰纪念书签</h3></div><button class="close-btn" data-close="bookmarkOverlay" aria-label="关闭">×</button></div>
+      <p class="panel-copy">先预览纪念书签的视觉样式。正式打卡序号需要接入云端后由服务器生成；当前不会伪造真实序号。</p>
+      <div class="bookmark-stage"><div class="bookmark-card" id="bookmarkCard">
+        <div class="bookmark-brand">凤凰花开的路口</div>
+        <div class="bookmark-image-wrap"><img class="bookmark-image" id="bookmarkImage" src="intro-campus.jpeg" alt="校园记忆照片"><div class="bookmark-vertical left"><span>那</span><span>年</span><span>夏</span><span>天</span></div><div class="bookmark-vertical right"><span>终</span><span>会</span><span>再</span><span>见</span></div><div class="bookmark-overlay-quote" id="bookmarkOverlayQuote">我们曾在这里，认真地年轻过。</div></div>
+        <div class="bookmark-number">打卡序号 · 云端启用后生成</div>
+        <div class="bookmark-footer"><span class="footer-message" id="bookmarkFooterMessage">愿你走过很远的路，仍记得来时的方向。</span><span>南宁四中<br>五象凤凰校区<br>EST. 2018</span></div>
+      </div></div>
+      <div class="bookmark-controls"><button class="secondary-btn" id="shuffleBookmark">换一张书签</button><button class="primary-btn" id="saveBookmark">保存书签</button></div>
+      <div class="footer-note" id="bookmarkSaveNote">保存功能会尝试生成图片；若当前浏览器不支持，将提示使用系统截图。</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -275,34 +387,51 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   const COLORS = ['pink','gold','sage','blue','peach','lilac'];
   const $ = id => document.getElementById(id);
 
-  // Welcome sequence: once per tab session; all original map logic remains unchanged.
+  // Intro: visitors can advance at their own pace; no timed second welcome page.
   const intro = $('phoenix-intro');
   if (intro) {
     let alreadySeen = false;
     try { alreadySeen = sessionStorage.getItem('phoenix_intro_seen') === '1'; } catch (_) {}
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let introTimers = [];
-    const introLater = (fn, ms) => introTimers.push(setTimeout(fn, ms));
+    const introPhotos = Array.from(intro.querySelectorAll('.intro-photo'));
+    const scenes = [
+      {title:'好久不见。', copy:'这里有我们走过的路，<br>也有我们一起留下的故事。', caption:'一些地方，一些故事，还有曾经的我们。'},
+      {title:'那些曾经平凡的日子', copy:'后来想起，才发现每一段都闪着光。', caption:'当时只道是寻常。'},
+      {title:'走过无数次的路', copy:'你还记得，那些熟悉的走廊吗？', caption:'有些路，毕业以后才开始想念。'},
+      {title:'还记得吗？', copy:'我们四中特有的「水族馆」。', caption:'愿每一段青春，都有地方安放。'}
+    ];
+    let sceneIndex = 0;
+    function showScene(index) {
+      sceneIndex = Math.max(0, Math.min(scenes.length - 1, index));
+      const scene = scenes[sceneIndex];
+      $('introTitle').textContent = scene.title;
+      $('introCopy').innerHTML = scene.copy;
+      $('introCaption').textContent = scene.caption;
+      introPhotos.forEach((photo, i) => photo.classList.toggle('active', i === sceneIndex));
+      $('introFinal').classList.toggle('show', sceneIndex === scenes.length - 1);
+      $('introBrand').classList.toggle('show', sceneIndex === scenes.length - 1);
+      $('introNext').hidden = sceneIndex === scenes.length - 1;
+      $('introEnter').classList.toggle('show', sceneIndex === scenes.length - 1);
+      if (reduceMotion) introPhotos.forEach((photo, i) => { photo.style.transition = 'none'; photo.classList.toggle('active', i === sceneIndex); });
+    }
     function closeIntro() {
-      introTimers.forEach(clearTimeout); introTimers = [];
       try { sessionStorage.setItem('phoenix_intro_seen', '1'); } catch (_) {}
       intro.classList.add('leaving');
       setTimeout(() => { intro.hidden = true; }, 680);
     }
     if (alreadySeen) intro.hidden = true;
     else {
+      showScene(0);
       $('introSkip').addEventListener('click', closeIntro);
       $('introEnter').addEventListener('click', closeIntro);
-      if (reduceMotion) {
-        $('introFinal').classList.add('show'); $('introBrand').classList.add('show'); $('introEnter').classList.add('show');
-      } else {
-        introLater(() => { $('introTitle').textContent = '那些曾经平凡的日子'; $('introCopy').innerHTML = '后来想起，才发现每一段都闪着光。'; }, 2200);
-        introLater(() => { $('introTitle').textContent = '走过无数次的路'; $('introCopy').innerHTML = '你还记得，那些熟悉的走廊吗？'; }, 4300);
-        introLater(() => { $('introTitle').textContent = '还记得吗？'; $('introCopy').innerHTML = '我们四中特有的「水族馆」。'; $('introFinal').classList.add('show'); }, 6400);
-        introLater(() => { $('introBrand').classList.add('show'); $('introEnter').classList.add('show'); }, 7600);
-      }
+      $('introNext').addEventListener('click', () => showScene(sceneIndex + 1));
+      intro.addEventListener('click', event => {
+        if (event.target.closest('button')) return;
+        if (sceneIndex < scenes.length - 1) showScene(sceneIndex + 1);
+      });
     }
   }
+
   const viewport = $('map-viewport'), layer = $('map-layer'), mapImg = $('map-img');
   const toastEl = $('toast'), warningEl = $('storageWarning');
   let notes = [], scale = 1, tx = 0, ty = 0;
@@ -395,7 +524,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   function clampTranslate() {
     const vw = viewport.clientWidth, vh = viewport.clientHeight;
     const sw = MAP_WIDTH * scale, sh = MAP_HEIGHT * scale;
-    // 保留至少一条可拖动边缘；当地图小于视口时保持居中。
     tx = sw <= vw ? (vw - sw) / 2 : Math.min(0, Math.max(vw - sw, tx));
     ty = sh <= vh ? (vh - sh) / 2 : Math.min(0, Math.max(vh - sh, ty));
   }
@@ -479,7 +607,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   function exportBackup() {
     let payload = {version:1, exportedAt:new Date().toISOString(), notes};
     try {
-      // 若读取异常，尽量允许用户导出原始存储字符串作为抢救材料。
       if (!storageReady) {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw !== null) {
@@ -501,7 +628,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       for (const note of imported) if (!byId.has(note.id)) byId.set(note.id, note);
       const merged = Array.from(byId.values());
       if (!confirm(`备份中有 ${imported.length} 张便签。合并后共 ${merged.length} 张，是否继续？`)) return;
-      // 若旧存储损坏，用户明确选择导入后允许用有效数据重建存储。
       const oldReady = storageReady; storageReady = true;
       if (persist(merged)) {
         showStorageWarning('备份已导入并合并。建议再次导出一份新备份。');
@@ -551,7 +677,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       const pts = Array.from(pointers.values()).slice(0,2), mid = midpoint(pts[0],pts[1]);
       const ratio = dist(pts[0],pts[1]) / gesture.startDistance;
       const nextScale = Math.max(MIN_SCALE,Math.min(MAX_SCALE,gesture.startScale * ratio));
-      // 以起始双指中点对应的地图坐标为锚点，缩放时尽量保持内容跟手。
       const anchorX = (gesture.startMid.x - gesture.startTx) / gesture.startScale;
       const anchorY = (gesture.startMid.y - gesture.startTy) / gesture.startScale;
       scale = nextScale; tx = mid.x - anchorX * scale; ty = mid.y - anchorY * scale;
@@ -570,7 +695,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       viewport.classList.remove('is-dragging');
       gesture = null; moved = false;
       if (shouldAdd) {
-        const rect = viewport.getBoundingClientRect();
         const mapX = (point.x - tx) / scale;
         const mapY = (point.y - ty) / scale;
         if (mapX >= 0 && mapX <= MAP_WIDTH && mapY >= 0 && mapY <= MAP_HEIGHT) {
@@ -578,7 +702,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
         }
       }
     } else if (pointers.size === 1) {
-      // 双指缩放结束后，不把剩余手指的移动误判为一次新的点击。
       const remaining = Array.from(pointers.values())[0];
       gesture = {type:'pan', start:remaining, last:remaining, tx, ty, moved:true};
       moved = true;
@@ -599,7 +722,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   }
   $('resetMap').addEventListener('click',fitMap);
   $('addHint').addEventListener('click',()=>{
-    // 按钮入口将便签放在当前视口中心对应的底图位置。
     const x=(viewport.clientWidth/2-tx)/scale, y=(viewport.clientHeight/2-ty)/scale;
     if(x>=0&&x<=MAP_WIDTH&&y>=0&&y<=MAP_HEIGHT) openAdd(x/MAP_WIDTH*100,y/MAP_HEIGHT*100);
     else {fitMap();toast('已回到地图全景，再选择一个位置吧');}
@@ -618,11 +740,188 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   $('importBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',e=>importBackup(e.target.files && e.target.files[0]));
   ['addOverlay','readOverlay','rulesOverlay','backupOverlay'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeOverlay(id)}));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAdd();closeRead();closeOverlay('rulesOverlay');closeOverlay('backupOverlay')}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAdd();closeRead();['rulesOverlay','backupOverlay','menuOverlay','timeOverlay','placeOverlay','photoWallOverlay','featureOverlay','bookmarkOverlay'].forEach(closeOverlay)}});
   window.addEventListener('resize',()=>{clampTranslate();applyTransform()});
   if ('ResizeObserver' in window) new ResizeObserver(()=>{clampTranslate();applyTransform()}).observe(viewport);
 
-  // 初始化：优先保留现有仓库的校园底图与旧版 phoenix_notes 数据。
+  const CAMPUS_PLACES = [
+    {id:'west-gate',name:'西侧校门',category:'校门',symbol:'⌂',x:7,y:59,desc:'日常出入的校门。'},
+    {id:'track',name:'田径场',category:'运动区',symbol:'🏃',x:66,y:15,desc:'蓝色跑道与足球场，是校园里最开阔的地方。'},
+    {id:'wind-sports',name:'风雨操场',category:'运动区',symbol:'🏟',x:27,y:29,desc:'田径场西侧的大型室内运动空间。'},
+    {id:'gym',name:'体育馆',category:'运动区',symbol:'🏀',x:61,y:32,desc:'靠近大榕树与食堂的体育馆。'},
+    {id:'canteen',name:'尚食堂',category:'生活区',symbol:'🍚',x:76,y:36,desc:'日常吃饭、相遇和聊天的地方。'},
+    {id:'banyan',name:'大榕树·高考红绳',category:'校园记忆',symbol:'🌳',x:51,y:36,desc:'每年高考前，同学们会在这里系上红绳，留下祝愿。'},
+    {id:'yushu',name:'玉树阁',category:'生活区',symbol:'🏠',x:31,y:42,desc:'男生宿舍。'},
+    {id:'yuli',name:'玉立苑',category:'生活区',symbol:'🏠',x:65,y:42,desc:'女生宿舍。'},
+    {id:'corridor',name:'复兴大道／廊桥',category:'中央地标',symbol:'↕',x:51,y:46,desc:'连接校园多个区域的南北向长廊。'},
+    {id:'wings',name:'凤凰双翼·教学楼群',category:'教学区',symbol:'🪽',x:49,y:53,desc:'四栋教学楼整体构成的两翼形态，不拆分为四个独立地点。'},
+    {id:'auditorium',name:'报告厅',category:'教学区',symbol:'▦',x:76,y:53,desc:'位于右侧教学楼翼内侧的方形建筑。'},
+    {id:'library',name:'图书馆',category:'中央地标',symbol:'📚',x:50,y:59,desc:'从教学楼群中央连接处向南延伸的图书馆。'},
+    {id:'aquarium',name:'水族馆·喷泉',category:'校园记忆',symbol:'⛲',x:51,y:57,desc:'图书馆旁边的喷泉，也是四中独有的熟悉称呼。'},
+    {id:'zhiyuan',name:'志远广场',category:'校园广场',symbol:'✦',x:39,y:62,desc:'每周一晨会所在的广场。'},
+    {id:'tuqiang',name:'图强广场',category:'校园广场',symbol:'✦',x:50,y:78,desc:'主门内侧的大面积铺装广场，曾用于军训和大型集会。'}
+  ];
+  const MENU_GROUPS = {
+    menuAbout:[
+      ['book-open','我们的原则与声明','项目价值、内容规则与隐私边界','principles'],
+      ['clock','项目时间线','记录网站与资料整理的里程碑','timeline'],
+      ['help-circle','使用指南与常见问题','地图、时光索引和照片墙怎么用','guide']
+    ],
+    menuDiscover:[
+      ['shuffle','随机拾起一段回忆','从已公开的内容中偶然遇见一段记忆','random'],
+      ['calendar','历年今日','回看往年同一天的校园记忆','today'],
+      ['heart','我珍藏的回忆','收藏功能将在云端账号机制接入后启用','favorites'],
+      ['bookmark','制作校园纪念卡','预览可保存的凤凰纪念书签','bookmark']
+    ],
+    menuBuild:[
+      ['image','参与共建／投稿','提交照片、补充年代与地点信息','contribute'],
+      ['feather','写一封树洞信','留下秘密、遗憾或寄语','treehole'],
+      ['sprout','一起守护这棵树','帮助辨认老照片、校对年代与地点','helpTree']
+    ],
+    menuCare:[
+      ['message-circle','想对开发者说的话','提交建议、感谢或问题反馈','feedback'],
+      ['shield-check','隐私与删除申请','申请纠错、隐私处理或删除内容','privacy']
+    ]
+  };
+  function renderMenu() {
+    Object.entries(MENU_GROUPS).forEach(([target, items]) => {
+      const container = $(target); if (!container) return;
+      container.replaceChildren();
+      items.forEach(([symbol,title,desc,action]) => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'menu-item';
+        const icon = document.createElement('span'); icon.className = 'menu-symbol'; icon.textContent = ({'book-open':'▤','clock':'◷','help-circle':'?','shuffle':'⤨','calendar':'▦','heart':'♡','bookmark':'▮','image':'▧','feather':'✎','sprout':'♧','message-circle':'…','shield-check':'◇'})[symbol] || '✦';
+        const copy = document.createElement('span'); copy.className = 'menu-copy';
+        const strong = document.createElement('strong'); strong.textContent = title;
+        const small = document.createElement('small'); small.textContent = desc;
+        copy.append(strong,small); const arrow = document.createElement('span'); arrow.className = 'menu-arrow'; arrow.textContent = '›';
+        button.append(icon,copy,arrow); button.addEventListener('click',()=>handleMenuAction(action,title)); container.appendChild(button);
+      });
+    });
+  }
+  function openFeature(title, content, kicker='PHOENIX FLOWER') {
+    $('featureTitle').textContent = title; $('featureKicker').textContent = kicker;
+    $('featureContent').textContent = content; $('featureActions').replaceChildren();
+    openOverlay('featureOverlay');
+  }
+  function handleMenuAction(action,title) {
+    closeOverlay('menuOverlay');
+    if (action==='bookmark') { openOverlay('bookmarkOverlay'); shuffleBookmark(); return; }
+    if (action==='today') { openOverlay('timeOverlay'); $('timeDate').value = new Date().toISOString().slice(0,10); $('timeIndexStatus').textContent='历年今日入口已选中今天的日期。共享照片库尚未接入，因此暂时无法展示跨年份的真实照片。'; return; }
+    if (action==='random') {
+      if (notes.length) { const note=notes[Math.floor(Math.random()*notes.length)]; openRead(note.id); }
+      else openFeature(title,'这里还没有可供随机拾起的公开回忆。等校园照片与故事库开放后，这里会从已公开内容中随机选取，不会把本地私密便签冒充为全站公开内容。');
+      return;
+    }
+    const copy = {
+      principles:'这个项目希望安静地保存真实校园记忆。请尊重他人隐私，不公开敏感个人信息，不发布骚扰、造谣或人身攻击内容。匿名不代表私密；公开内容可能被其他访客看到。',
+      timeline:'项目里程碑会记录网站上线、地图索引完善、照片资料整理和云端功能启用等真实进展。后续会在确认发生后逐条更新，不预填虚构的完成记录。',
+      guide:'拖动地图探索校园，双指缩放；选择地点索引可飞到校园地标。时光索引预留年份、日期与内容类型筛选。当前便签只保存在本设备浏览器，尚不与其他访客共享。',
+      favorites:'收藏需要稳定的用户身份与云端数据库。当前版本尚未接入账号和云端同步，因此不会把浏览器本地状态称为跨设备收藏。',
+      contribute:'照片投稿需要云端存储、图片压缩、审核与删除机制。当前页面还没有接入共享上传服务，请暂时不要把本地预览误认为已成功投稿。后续会支持上传预览、自动压缩、独立填写日期和地点。',
+      treehole:'树洞将用于秘密、遗憾与寄语，并区分公开和私密内容。正式开放前必须先完成访问权限、匿名机制、举报和删除流程；当前尚未接入安全的云端私密存储。',
+      helpTree:'你可以帮助识别老照片中的地点、年份、活动或班级信息。正式资料共建入口开放后，会支持补充说明与校对；未经核实的信息会保留不确定标记。',
+      feedback:'欢迎通过项目仓库提交建议、问题或感谢。这里也可以预留“给开发者充电”入口，但当前未接入支付。任何微信支付方案都需要先核实商户资格、接入要求和收款方隐私边界。',
+      privacy:'隐私与删除申请会在云端内容系统接入后提供正式流程。当前本地便签由创建它的浏览器保存，可通过便签阅读页删除，也建议定期导出 JSON 备份。'
+    };
+    openFeature(title, copy[action] || '该功能将随着项目逐步完善。');
+  }
+  function renderPlaceChoices() {
+    const container=$('placeChoices'); container.replaceChildren();
+    CAMPUS_PLACES.forEach(place=>{
+      const button=document.createElement('button'); button.type='button'; button.className='place-choice';
+      const symbol=document.createElement('span'); symbol.className='place-symbol'; symbol.textContent=place.symbol;
+      const copy=document.createElement('span'); const strong=document.createElement('strong'); strong.textContent=place.name;
+      const small=document.createElement('small'); small.textContent=place.category; copy.append(strong,small); button.append(symbol,copy);
+      button.addEventListener('click',()=>focusPlace(place)); container.appendChild(button);
+    });
+  }
+  let currentPlaceId = null;
+  function focusPlace(place) {
+    currentPlaceId = place.id;
+    closeOverlay('placeOverlay');
+    const targetScale=Math.max(scale,Math.min(1.15,Math.max(.72,Math.min(viewport.clientWidth/MAP_WIDTH,viewport.clientHeight/MAP_HEIGHT)*2.25)));
+    scale=targetScale; tx=viewport.clientWidth/2-(place.x/100*MAP_WIDTH)*scale; ty=viewport.clientHeight/2-(place.y/100*MAP_HEIGHT)*scale;
+    clampTranslate(); layer.style.transition='transform .7s cubic-bezier(.2,.75,.2,1)'; applyTransform();
+    setTimeout(()=>{layer.style.transition='';},760);
+    $('photoWallTitle').textContent=place.name+' · 照片墙';
+    $('photoWallDescription').textContent=place.desc+' 这里可以汇集不同年份、不同届别的校园记忆。';
+    $('photoWallEmpty').textContent='这片记忆墙还在等待第一张照片。共享照片库接入后，这里会展示真实投稿，并支持时间与地点组合筛选。当前不会显示虚构的校园照片。';
+    openOverlay('photoWallOverlay');
+  }
+  function focusPlaceMapOnly(place) {
+    const targetScale=Math.max(scale,Math.min(1.15,Math.max(.72,Math.min(viewport.clientWidth/MAP_WIDTH,viewport.clientHeight/MAP_HEIGHT)*2.25)));
+    scale=targetScale; tx=viewport.clientWidth/2-(place.x/100*MAP_WIDTH)*scale; ty=viewport.clientHeight/2-(place.y/100*MAP_HEIGHT)*scale;
+    clampTranslate(); layer.style.transition='transform .7s cubic-bezier(.2,.75,.2,1)'; applyTransform(); setTimeout(()=>{layer.style.transition='';},760);
+  }
+  function initTimeIndex() {
+    const select=$('timeYear');
+    for(let year=2018;year<=2118;year++){const option=document.createElement('option');option.value=String(year);option.textContent=year===2018?'2018 年 · 建校记忆起点':`${year} 年`;select.appendChild(option);}
+    select.value=String(new Date().getFullYear()>=2018&&new Date().getFullYear()<=2118?new Date().getFullYear():2018);
+    const placeSelect=$('timePlace'); CAMPUS_PLACES.forEach(place=>{const option=document.createElement('option');option.value=place.id;option.textContent=place.name;placeSelect.appendChild(option);});
+    const wallYear=$('wallYear'); for(let year=2018;year<=2118;year++){const option=document.createElement('option');option.value=String(year);option.textContent=year+' 年';wallYear.appendChild(option);}
+  }
+  function applyTimeSelection(isToday=false) {
+    const date=$('timeDate').value;
+    const year=date?Number(date.slice(0,4)):Number($('timeYear').value);
+    $('timeYear').value=String(Math.max(2018,Math.min(2118,year)));
+    const kind=$('timeKind').value;
+    const placeValue=$('timePlace').value; const placeName=placeValue==='all'?'全部地点':(CAMPUS_PLACES.find(p=>p.id===placeValue)?.name||'全部地点');
+    $('timeIndexStatus').textContent=(isToday?'历年今日：':`已选择 ${date||year+' 年'}；`)+`地点：${placeName}；类型：${({all:'全部记忆',photo:'照片',story:'故事',event:'活动'})[kind]}。当前共享照片库尚未接入，因此筛选条件已准备好，但暂时没有真实的公开照片数据可展示。日期不详的内容在未来的数据系统中也会保留可查。`;
+  }
+  const bookmarkPhotos=['intro-campus.jpeg','intro-sunset.jpeg','intro-corridor.jpeg','intro-fountain.jpeg'];
+  const bookmarkQuotes=['我们曾在这里，认真地年轻过。','愿你走过很远的路，仍记得来时的方向。','那些平凡的日子，后来都闪着光。','如果重逢有地址，希望是这里。','毕业不是告别，只是把故事带去远方。'];
+  const bookmarkFooters=['愿每一段青春，都有地方安放。','愿你前路明亮，也常记得来时的路。','有些地方不必常回去，却会一直记得。','愿我们各自长大，也仍保有当年的真诚。'];
+  function shuffleBookmark() {
+    const image=bookmarkPhotos[Math.floor(Math.random()*bookmarkPhotos.length)];
+    $('bookmarkImage').src=image;
+    $('bookmarkOverlayQuote').textContent=bookmarkQuotes[Math.floor(Math.random()*bookmarkQuotes.length)];
+    $('bookmarkFooterMessage').textContent=bookmarkFooters[Math.floor(Math.random()*bookmarkFooters.length)];
+    $('bookmarkSaveNote').textContent='书签预览已更新。当前只使用项目已有的入场照片；正式打卡编号将在云端接入后生成。';
+  }
+  async function saveBookmarkImage() {
+    try {
+      const img=$('bookmarkImage');
+      const canvas=document.createElement('canvas'); canvas.width=900; canvas.height=1500;
+      const ctx=canvas.getContext('2d'); if(!ctx) throw new Error('当前浏览器不支持图片生成');
+      ctx.fillStyle='#fff9ee';ctx.fillRect(0,0,900,1500);
+      ctx.fillStyle='#594b3d';ctx.textAlign='center';ctx.font='36px serif';ctx.fillText('凤凰花开的路口',450,90);
+      const source=new Image(); source.crossOrigin='anonymous'; source.src=img.src;
+      await new Promise((resolve,reject)=>{if(source.complete&&source.naturalWidth)resolve();else{source.onload=resolve;source.onerror=reject;}});
+      const ratio=Math.max(820/source.width,850/source.height);const dw=source.width*ratio,dh=source.height*ratio;
+      ctx.save();ctx.beginPath();ctx.rect(95,130,710,850);ctx.clip();ctx.drawImage(source,95+(710-dw)/2,130+(850-dh)/2,dw,dh);ctx.restore();
+      const grad=ctx.createLinearGradient(0,760,0,980);grad.addColorStop(0,'rgba(30,24,20,0)');grad.addColorStop(1,'rgba(30,24,20,.76)');ctx.fillStyle=grad;ctx.fillRect(95,730,710,250);
+      ctx.fillStyle='#fffaf0';ctx.font='42px serif';ctx.textAlign='center';wrapCanvasText(ctx,$('bookmarkOverlayQuote').textContent,450,925,650,48);
+      ctx.fillStyle='#97785d';ctx.font='25px sans-serif';ctx.fillText('打卡序号 · 云端启用后生成',450,1040);
+      ctx.strokeStyle='#e8dac8';ctx.beginPath();ctx.moveTo(100,1090);ctx.lineTo(800,1090);ctx.stroke();
+      ctx.fillStyle='#68513f';ctx.font='30px serif';ctx.textAlign='left';wrapCanvasText(ctx,$('bookmarkFooterMessage').textContent,110,1160,460,45);
+      ctx.fillStyle='#89735f';ctx.font='23px sans-serif';ctx.textAlign='right';ctx.fillText('南宁四中',790,1160);ctx.fillText('五象凤凰校区',790,1195);ctx.fillText('EST. 2018',790,1230);
+      ctx.fillStyle='#8c6e55';ctx.font='24px serif';for(let i=0;i<4;i++){ctx.fillText(['那','年','夏','天'][i],60,260+i*130);ctx.fillText(['终','会','再','见'][i],840,260+i*130);}
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+      if(!blob) throw new Error('无法生成图片');
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='凤凰纪念书签.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      $('bookmarkSaveNote').textContent='书签图片已生成下载。提醒：当前是视觉预览，不包含真实打卡序号。';
+    } catch(err) {
+      $('bookmarkSaveNote').textContent='当前浏览器无法直接生成图片。可以先尝试系统截图；书签视觉预览仍可查看。';
+    }
+  }
+  function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){let line='',yy=y;for(const char of text){const test=line+char;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,yy);line=char;yy+=lineHeight;}else line=test;}if(line)ctx.fillText(line,x,yy);}
+
+  $('menuBtn').addEventListener('click',()=>openOverlay('menuOverlay'));
+  $('menuRulesBtn').addEventListener('click',()=>{closeOverlay('menuOverlay');openOverlay('rulesOverlay');});
+  $('menuBackupBtn').addEventListener('click',()=>{closeOverlay('menuOverlay');openOverlay('backupOverlay');});
+  $('timeIndexBtn').addEventListener('click',()=>openOverlay('timeOverlay'));
+  $('placeIndexBtn').addEventListener('click',()=>openOverlay('placeOverlay'));
+  $('applyTimeIndex').addEventListener('click',()=>applyTimeSelection(false));
+  $('todayMemoryBtn').addEventListener('click',()=>{const today=new Date();$('timeDate').value=today.toISOString().slice(0,10);applyTimeSelection(true);});
+  $('placeResetBtn').addEventListener('click',()=>{closeOverlay('placeOverlay');fitMap();toast('已回到校园全图');});
+  $('wallMapBtn').addEventListener('click',()=>{closeOverlay('photoWallOverlay');const place=CAMPUS_PLACES.find(p=>p.id===currentPlaceId);if(place)focusPlaceMapOnly(place);});
+  $('wallFilterBtn').addEventListener('click',()=>{const date=$('wallDate').value;const year=$('wallYear').value;$('photoWallEmpty').textContent=`已选择${date?'日期 '+date:(year==='all'?'全部年份':year+' 年')}。共享照片库接入后，这里会显示符合筛选条件的真实内容；当前没有可查询的公开照片数据。`;});
+  $('shuffleBookmark').addEventListener('click',shuffleBookmark);
+  $('saveBookmark').addEventListener('click',saveBookmarkImage);
+  document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeOverlay(button.dataset.close)));
+  ['menuOverlay','timeOverlay','placeOverlay','photoWallOverlay','featureOverlay','bookmarkOverlay'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeOverlay(id)}));
+  renderMenu(); renderPlaceChoices(); initTimeIndex();
+
   loadNotes();
   renderMarkers();
   mapImg.addEventListener('load',()=>{fitMap();applyTransform()},{once:true});
