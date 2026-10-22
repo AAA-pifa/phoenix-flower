@@ -1,0 +1,20 @@
+凤凰花开的路口｜入场动画更新包
+
+文件：
+- index.html：在现有页面基础上增加入场序章，保留原地图、便签、导入导出逻辑。
+- intro-campus.jpeg：校门/教学楼
+- intro-sunset.jpeg：宿舍与教学楼之间的日落
+- intro-corridor.jpeg：走廊
+- intro-fountain.jpeg：四中特有的“水族馆”
+
+如何部署（手机 GitHub 网页版）：
+1. 打开 https://github.com/60feets/phoenix-flower
+2. 先确认仓库里现有 index.html 和 IMG_4772.jpeg 都还在。不要删除 IMG_4772.jpeg。
+3. 建议先下载/保存当前 index.html 作为回退备份。
+4. 上传本包中的 4 张 intro-*.jpeg 图片到仓库根目录（Add file → Upload files），提交。
+5. 打开仓库现有 index.html，点击铅笔编辑；将其内容替换为本包 index.html 的完整内容，提交更改。也可使用 Add file → Upload files 上传 index.html 并选择覆盖，但 GitHub 手机上编辑已有文件通常更容易确认。
+6. 等待 GitHub Pages 更新后，打开 https://60feets.github.io/phoenix-flower/ 检查。首次会播放；同一标签页内再次刷新不会重复播放。完全关闭标签页后重新打开可再次看到。
+
+重要：不要删除/替换 IMG_4772.jpeg；本次仅新增 4 张照片并替换 index.html。原本地便签数据不会被本代码主动清除，但它们仍然保存在各自设备的浏览器里。
+
+如果页面没显示动画，先检查 4 张图片文件是否在仓库根目录且文件名完全一致。建议先在新标签页验证；如有问题可用备份 index.html 回滚。

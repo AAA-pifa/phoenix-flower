@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6efe5">
+<title>凤凰花开的路口</title>
+<style>
+:root{
+  --ink:#40372f;--muted:#88796d;--paper:#fffaf2;--cream:#f6efe5;--line:rgba(76,58,43,.12);
+  --terra:#c96f4a;--terra-dark:#9f4f35;--pink:#f2d2ca;--gold:#f3dfab;--sage:#d9e0ce;
+  --shadow:0 18px 50px rgba(62,43,29,.13);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--cream);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid rgba(201,111,74,.35);outline-offset:2px}
+#app{position:fixed;inset:0;overflow:hidden;background:#e9e1d5}
+#map-viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;background:#e7dfd2;cursor:grab}
+#map-viewport.is-dragging{cursor:grabbing}
+#map-layer{position:absolute;left:0;top:0;width:1500px;height:2441px;transform-origin:0 0;will-change:transform}
+#map-img{display:block;width:1500px;height:2441px;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.map-wash{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(246,239,229,.16),transparent 38%,rgba(246,239,229,.08))}
+.marker{position:absolute;width:38px;height:42px;margin:-21px 0 0 -19px;border:2px solid rgba(255,250,242,.95);
+  border-radius:50% 50% 50% 10px;transform-origin:center;display:grid;place-items:center;box-shadow:0 5px 14px rgba(54,38,25,.22);
+  font-size:17px;line-height:1;z-index:5;touch-action:manipulation;user-select:none;transition:box-shadow .15s}
+.marker:after{content:"";position:absolute;inset:4px;border:1px solid rgba(64,55,47,.12);border-radius:50% 50% 50% 10px;pointer-events:none}
+.marker:active{box-shadow:0 2px 6px rgba(54,38,25,.2)}
+.marker .marker-flower{transform:scale(var(--marker-scale,1));pointer-events:none}
+.marker[data-color="pink"]{background:#f1c9c3}.marker[data-color="gold"]{background:#f1d99d}
+.marker[data-color="sage"]{background:#d0dcc5}.marker[data-color="blue"]{background:#c7d7e3}
+.marker[data-color="peach"]{background:#e8b08f}.marker[data-color="lilac"]{background:#ddc6df}
+.topbar{position:absolute;z-index:20;left:0;right:0;top:0;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 26px;
+  background:linear-gradient(180deg,rgba(246,239,229,.97),rgba(246,239,229,.88) 65%,rgba(246,239,229,0))}
+.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:900px;margin:auto}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:39px;height:39px;border-radius:50% 50% 50% 8px;background:var(--terra);color:#fff8ee;display:grid;place-items:center;font-size:21px;box-shadow:0 5px 14px #9b53332b;flex-shrink:0}
+.brand-copy h1{font-family:"Songti SC",STSong,serif;font-size:18px;letter-spacing:.08em;margin:0;font-weight:650}
+.brand-copy p{font-size:11px;letter-spacing:.04em;color:var(--muted);margin:4px 0 0}
+.top-actions{display:flex;gap:7px;flex-shrink:0}
+.icon-btn{width:39px;height:39px;border:1px solid var(--line);border-radius:50%;background:rgba(255,250,242,.88);color:var(--ink);display:grid;place-items:center;font-size:16px;box-shadow:0 3px 10px #4a34200b}
+.icon-btn:active{transform:scale(.96)}
+.welcome{position:absolute;z-index:10;top:94px;left:16px;max-width:270px;pointer-events:none}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--terra-dark);font-weight:700;margin-bottom:8px}
+.welcome h2{font-family:"Songti SC",STSong,serif;font-weight:500;font-size:clamp(24px,6vw,33px);line-height:1.35;letter-spacing:.04em;margin:0 0 7px;text-shadow:0 1px 0 #f6efe5}
+.welcome p{font-size:12px;line-height:1.8;color:#68594c;margin:0;max-width:235px}
+.map-controls{position:absolute;z-index:20;right:15px;top:45%;display:flex;flex-direction:column;gap:7px;transform:translateY(-50%)}
+.map-controls button{width:40px;height:40px;border:1px solid rgba(76,58,43,.12);border-radius:14px;background:rgba(255,250,242,.94);box-shadow:0 5px 18px #3f2d1e17;color:var(--ink);font-size:20px}
+.map-controls .reset{font-size:12px;font-weight:700}
+.bottom-panel{position:absolute;z-index:20;left:12px;right:12px;bottom:calc(12px + var(--safe-b));max-width:700px;margin:auto;padding:14px 15px 13px;
+  border:1px solid rgba(255,255,255,.78);border-radius:22px;background:rgba(255,250,242,.95);box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-title{font-family:"Songti SC",STSong,serif;font-size:17px;font-weight:650}
+.count-pill{border-radius:100px;background:#f2e6d6;padding:6px 10px;font-size:11px;color:#715a48;white-space:nowrap}
+.panel-copy{font-size:12px;line-height:1.6;color:var(--muted);margin:7px 0 12px}
+.panel-actions{display:flex;gap:8px}
+.primary-btn,.secondary-btn{border:0;border-radius:13px;min-height:43px;padding:0 14px;font-size:13px;font-weight:650;display:flex;align-items:center;justify-content:center;gap:7px}
+.primary-btn{background:var(--terra);color:white;flex:1;box-shadow:0 5px 13px #b7624226}
+.primary-btn:active{background:var(--terra-dark)}
+.secondary-btn{background:#f0e7db;color:#59483b}
+.storage-warning{display:none;background:#fff0db;color:#784b2b;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.5;margin-top:9px}
+.storage-warning.show{display:block}
+.toast{position:absolute;z-index:80;left:50%;bottom:calc(160px + var(--safe-b));transform:translate(-50%,12px);opacity:0;pointer-events:none;
+  max-width:calc(100% - 32px);padding:10px 14px;background:#44372e;color:#fff8ee;border-radius:12px;font-size:12px;line-height:1.5;box-shadow:0 8px 25px #33241930;transition:opacity .2s,transform .2s;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{position:absolute;z-index:60;inset:0;display:none;align-items:flex-end;justify-content:center;padding:14px;padding-bottom:calc(14px + var(--safe-b));background:rgba(48,37,29,.36);backdrop-filter:blur(4px)}
+.overlay.show{display:flex}
+.modal{width:min(100%,470px);max-height:calc(100% - 20px);overflow:auto;background:var(--paper);border:1px solid #fff;border-radius:24px;padding:23px 20px 19px;box-shadow:0 22px 70px #2f211d33;animation:rise .2s ease-out}
+@keyframes rise{from{opacity:.5;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:17px}
+.modal-kicker{font-size:10px;letter-spacing:.16em;color:var(--terra-dark);font-weight:700;margin-bottom:6px}
+.modal h3{font-family:"Songti SC",STSong,serif;font-size:22px;font-weight:600;line-height:1.4;margin:0}
+.close-btn{border:0;border-radius:50%;width:34px;height:34px;background:#f0e7db;color:var(--ink);font-size:20px;flex-shrink:0}
+.field{margin:14px 0}
+.field label{display:flex;justify-content:space-between;gap:8px;color:#78685b;font-size:12px;margin-bottom:7px}
+.field textarea,.field input{display:block;width:100%;border:1px solid #e5d9ca;border-radius:13px;background:#fffdf9;color:var(--ink);padding:12px 13px;font-size:15px;outline:none}
+.field textarea{resize:vertical;min-height:120px;line-height:1.7;max-height:32vh}
+.field textarea:focus,.field input:focus{border-color:#d99a7d;box-shadow:0 0 0 3px #d99a7d20}
+.modal-actions{display:flex;gap:9px;margin-top:17px}
+.modal-actions button{flex:1}
+.read-content{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.9;margin:18px 0 20px;color:#4d4036}
+.read-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:11px}
+.author{font-size:12px;color:#775b49;font-weight:650}
+.read-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.text-btn{border:0;background:transparent;color:#8b6955;font-size:12px;padding:12px 4px}
+.rules{font-size:13px;line-height:1.9;color:#6c5c4e;margin:12px 0 4px;padding-left:19px}
+.file-input{display:none}
+.footer-note{font-size:10px;color:#9a8b7c;text-align:center;margin-top:10px}
+@media(min-width:700px){
+ .topbar{padding-left:28px;padding-right:28px}.welcome{top:130px;left:32px;max-width:310px}.welcome p{font-size:13px}
+ .bottom-panel{left:24px;right:auto;bottom:24px;width:340px;padding:18px}
+ .map-controls{right:25px}.toast{bottom:220px}
+}
+@media(max-height:680px){
+ .welcome{top:85px}.welcome h2{font-size:23px}.welcome p{font-size:11px}
+ .bottom-panel{padding:11px 13px}.panel-copy{margin:5px 0 8px}.primary-btn,.secondary-btn{min-height:39px}
+ .modal{padding-top:18px}.field textarea{min-height:85px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Entrance sequence: added without changing the existing map or note storage. */
+#phoenix-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overflow:hidden;background:#18251f;color:#f5efe4;isolation:isolate}
+#phoenix-intro[hidden]{display:none}
+.intro-photos,.intro-shade{position:absolute;inset:0}
+.intro-photo{position:absolute;inset:0;opacity:0;background-position:center;background-size:cover;transform:scale(1.035);animation:intro-photo-cycle 8.4s ease-in-out 1 both}
+.intro-photo:nth-child(1){background-image:url('intro-campus.jpeg');animation-delay:0s}
+.intro-photo:nth-child(2){background-image:url('intro-sunset.jpeg');animation-delay:2.1s}
+.intro-photo:nth-child(3){background-image:url('intro-corridor.jpeg');animation-delay:4.2s}
+.intro-photo:nth-child(4){background-image:url('intro-fountain.jpeg');animation-delay:6.3s}
+@keyframes intro-photo-cycle{0%{opacity:0;transform:scale(1.035)}8%{opacity:1}23%{opacity:1;transform:scale(1)}31%{opacity:0}100%{opacity:0;transform:scale(1)}}
+.intro-shade{z-index:1;background:linear-gradient(180deg,rgba(13,23,19,.34),rgba(13,23,19,.34) 35%,rgba(13,23,19,.78)),linear-gradient(90deg,rgba(13,23,19,.22),transparent 70%)}
+.intro-content{position:relative;z-index:2;width:min(760px,100%);padding:calc(30px + env(safe-area-inset-top,0px)) 26px calc(28px + env(safe-area-inset-bottom,0px));text-align:center;display:flex;min-height:100%;flex-direction:column;align-items:center;justify-content:center}
+.intro-eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#e7d6b0;margin-bottom:22px}
+.intro-title{font-family:'Songti SC',STSong,serif;font-size:clamp(36px,8vw,68px);font-weight:500;letter-spacing:.08em;line-height:1.25;margin:0 0 18px;text-shadow:0 3px 24px #0005}
+.intro-copy{font-family:'Songti SC',STSong,serif;font-size:clamp(15px,3.6vw,20px);line-height:2;letter-spacing:.04em;color:#f5efe4;margin:0;min-height:4em;text-shadow:0 2px 16px #0008}
+.intro-final{font-size:14px;line-height:1.8;color:#f0dfbd;margin:8px 0 0;opacity:0;transition:opacity .7s ease}
+.intro-final.show{opacity:1}
+.intro-brand{font-family:'Songti SC',STSong,serif;font-size:clamp(23px,5vw,34px);letter-spacing:.12em;margin:24px 0 22px;opacity:0;transform:translateY(8px);transition:opacity .8s ease,transform .8s ease}
+.intro-brand.show{opacity:1;transform:translateY(0)}
+.intro-enter{border:1px solid rgba(245,239,228,.68);border-radius:999px;background:rgba(245,239,228,.12);backdrop-filter:blur(12px);color:#fffaf0;min-height:48px;padding:0 25px;font-size:14px;letter-spacing:.04em;opacity:0;pointer-events:none;transform:translateY(7px);transition:opacity .6s ease,transform .6s ease,background .2s}
+.intro-enter.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.intro-enter:active{background:rgba(245,239,228,.24)}
+.intro-skip{position:absolute;z-index:3;top:calc(14px + env(safe-area-inset-top,0px));right:16px;border:1px solid rgba(255,255,255,.38);border-radius:999px;background:rgba(15,25,20,.25);color:#fffaf0;padding:8px 13px;font-size:12px;backdrop-filter:blur(8px)}
+.intro-caption{font-size:11px;color:rgba(245,239,228,.68);margin-top:18px;letter-spacing:.04em}
+#phoenix-intro.leaving{opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s}
+@media(prefers-reduced-motion:reduce){.intro-photo{animation:none;opacity:0;transform:none}.intro-photo:first-child{opacity:1}#phoenix-intro *{transition:none!important;animation:none!important}}
+
+</style>
+</head>
+<body>
+
+<div id="phoenix-intro" aria-label="凤凰花开的路口欢迎序章">
+  <div class="intro-photos" aria-hidden="true">
+    <div class="intro-photo"></div><div class="intro-photo"></div><div class="intro-photo"></div><div class="intro-photo"></div>
+  </div>
+  <div class="intro-shade" aria-hidden="true"></div>
+  <button class="intro-skip" id="introSkip" type="button">跳过 ↗</button>
+  <div class="intro-content">
+    <div class="intro-eyebrow">A PLACE FOR OUR MEMORIES</div>
+    <h2 class="intro-title" id="introTitle">好久不见。</h2>
+    <p class="intro-copy" id="introCopy">这里有我们走过的路，<br>也有我们一起留下的故事。</p>
+    <p class="intro-final" id="introFinal">还记得我们四中特有的「水族馆」吗？</p>
+    <div class="intro-brand" id="introBrand">凤凰花开的路口</div>
+    <button class="intro-enter" id="introEnter" type="button">找回我们的青春　→</button>
+    <div class="intro-caption">一些地方，一些故事，还有曾经的我们。</div>
+  </div>
+</div>
+
+<div id="app">
+  <div id="map-viewport" aria-label="校园记忆地图，拖动探索，点击空白位置创建便签">
+    <div id="map-layer">
+      <img id="map-img" src="IMG_4772.jpeg" alt="校园平面图" draggable="false">
+    </div>
+    <div class="map-wash"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">🌺</div>
+        <div class="brand-copy">
+          <h1>凤凰花开的路口</h1>
+          <p>把记忆轻轻钉在曾经走过的地方</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="rulesBtn" aria-label="查看社区公约" title="社区公约">♡</button>
+        <button class="icon-btn" id="backupBtn" aria-label="备份与恢复" title="备份与恢复">↗</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="welcome" aria-label="项目介绍">
+    <div class="eyebrow">A MAP OF MEMORIES</div>
+    <h2>有些故事，<br>留在路过的地方。</h2>
+    <p>一棵树、一段走廊、某个黄昏。把那些不想忘记的瞬间，留在地图的某个角落。</p>
+  </section>
+
+  <div class="map-controls" aria-label="地图控制">
+    <button id="zoomIn" aria-label="放大地图" title="放大">＋</button>
+    <button id="zoomOut" aria-label="缩小地图" title="缩小">−</button>
+    <button id="resetMap" class="reset" aria-label="重置地图视图" title="回到全图">全图</button>
+  </div>
+
+  <section class="bottom-panel">
+    <div class="panel-top">
+      <div class="panel-title">把故事留在这里</div>
+      <div class="count-pill"><span id="noteCount">0</span> 张便签</div>
+    </div>
+    <p class="panel-copy" id="panelCopy">拖动地图，找一个熟悉的角落。轻点地图空白处，就能留下一张便签。</p>
+    <div class="panel-actions">
+      <button class="primary-btn" id="addHint">✦ 留下一张便签</button>
+      <button class="secondary-btn" id="viewAll">查看说明</button>
+    </div>
+    <div class="storage-warning" id="storageWarning" role="status"></div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="overlay" id="addOverlay" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div><div class="modal-kicker">LEAVE A LITTLE MEMORY</div><h3 id="addTitle">在这里留下一张便签</h3></div>
+        <button class="close-btn" id="closeAddX" aria-label="关闭">×</button>
+      </div>
+      <div class="field">
+        <label for="noteContent"><span>想说的话</span><span id="charCount">0 / 300</span></label>
+        <textarea id="noteContent" maxlength="300" placeholder="可以是一段风景、一句心情，或一个没说出口的瞬间……"></textarea>
+      </div>
+      <div class="field">
+        <label for="noteNickname"><span>留一个代号（选填）</span><span>最多 12 字</span></label>
+        <input id="noteNickname" maxlength="12" autocomplete="off" placeholder="不填也没关系">
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelAdd">再想一想</button>
+        <button class="primary-btn" id="submitAdd">钉在这里 ↗</button>
+      </div>
+      <div class="footer-note">当前是本地体验版，便签只保存在这台设备的浏览器中。</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="readOverlay" role="dialog" aria-modal="true" aria-labelledby="readTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div><div class="modal-kicker">A NOTE FROM THIS PLACE</div><h3 id="readTitle">一段留在这里的记忆</h3></div>
+        <button class="close-btn" id="closeReadX" aria-label="关闭">×</button>
+      </div>
+      <div class="read-meta"><span class="author" id="readNickname">匿名同学</span><span id="readTime"></span></div>
+      <div class="read-content" id="readContent"></div>
+      <div class="read-actions">
+        <button class="primary-btn" id="touchBtn">💛 轻轻触碰 <span id="touchCount">0</span></button>
+        <button class="secondary-btn" id="deleteBtn">删除这张便签</button>
+      </div>
+      <button class="text-btn" id="closeRead">合上这段记忆</button>
+      <div class="footer-note">触碰次数仅保存在当前浏览器，不代表公开点赞数。</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="rulesOverlay" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">A GENTLE REMINDER</div><h3 id="rulesTitle">让这里留给记忆</h3></div><button class="close-btn" id="closeRulesX" aria-label="关闭">×</button></div>
+      <ul class="rules">
+        <li>不点名挂人，不泄露他人的个人信息。</li>
+        <li>不发布人身攻击、造谣或骚扰内容。</li>
+        <li>这里留给风景、个人感受与真实回忆。</li>
+        <li>尊重每一段记忆，也尊重每一个人。</li>
+      </ul>
+      <p class="panel-copy">这是一个本地原型。当前便签只保存在你使用的浏览器中，不会自动分享给其他访客。</p>
+      <button class="primary-btn" id="closeRules" style="width:100%">我知道了</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="backupOverlay" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+    <div class="modal">
+      <div class="modal-head"><div><div class="modal-kicker">KEEP YOUR MEMORIES SAFE</div><h3 id="backupTitle">备份与恢复</h3></div><button class="close-btn" id="closeBackupX" aria-label="关闭">×</button></div>
+      <p class="panel-copy">便签只存在当前浏览器。建议偶尔导出备份；恢复备份会把当前便签与文件中的便签合并，重复 ID 不会重复导入。</p>
+      <div class="modal-actions">
+        <button class="primary-btn" id="exportBtn">导出 JSON 备份</button>
+        <button class="secondary-btn" id="importBtn">导入备份</button>
+      </div>
+      <input class="file-input" type="file" id="importFile" accept=".json,application/json">
+      <button class="text-btn" id="closeBackup" style="width:100%">关闭</button>
+      <div class="footer-note">如果浏览器存储不可用，请先导出备份，不要清理网站数据。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const MAP_WIDTH = 1500, MAP_HEIGHT = 2441;
+  const MIN_SCALE = 0.18, MAX_SCALE = 4.5, CLICK_THRESHOLD = 8;
+  const STORAGE_KEY = 'phoenix_notes';
+  const COLORS = ['pink','gold','sage','blue','peach','lilac'];
+  const $ = id => document.getElementById(id);
+
+  // Welcome sequence: once per tab session; all original map logic remains unchanged.
+  const intro = $('phoenix-intro');
+  if (intro) {
+    let alreadySeen = false;
+    try { alreadySeen = sessionStorage.getItem('phoenix_intro_seen') === '1'; } catch (_) {}
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let introTimers = [];
+    const introLater = (fn, ms) => introTimers.push(setTimeout(fn, ms));
+    function closeIntro() {
+      introTimers.forEach(clearTimeout); introTimers = [];
+      try { sessionStorage.setItem('phoenix_intro_seen', '1'); } catch (_) {}
+      intro.classList.add('leaving');
+      setTimeout(() => { intro.hidden = true; }, 680);
+    }
+    if (alreadySeen) intro.hidden = true;
+    else {
+      $('introSkip').addEventListener('click', closeIntro);
+      $('introEnter').addEventListener('click', closeIntro);
+      if (reduceMotion) {
+        $('introFinal').classList.add('show'); $('introBrand').classList.add('show'); $('introEnter').classList.add('show');
+      } else {
+        introLater(() => { $('introTitle').textContent = '那些曾经平凡的日子'; $('introCopy').innerHTML = '后来想起，才发现每一段都闪着光。'; }, 2200);
+        introLater(() => { $('introTitle').textContent = '走过无数次的路'; $('introCopy').innerHTML = '你还记得，那些熟悉的走廊吗？'; }, 4300);
+        introLater(() => { $('introTitle').textContent = '还记得吗？'; $('introCopy').innerHTML = '我们四中特有的「水族馆」。'; $('introFinal').classList.add('show'); }, 6400);
+        introLater(() => { $('introBrand').classList.add('show'); $('introEnter').classList.add('show'); }, 7600);
+      }
+    }
+  }
+  const viewport = $('map-viewport'), layer = $('map-layer'), mapImg = $('map-img');
+  const toastEl = $('toast'), warningEl = $('storageWarning');
+  let notes = [], scale = 1, tx = 0, ty = 0;
+  let pendingAddPos = null, currentReadId = null, pointers = new Map();
+  let gesture = null, moved = false, storageReady = true, storageMessage = '';
+  let toastTimer = null, demoMode = false;
+
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+  function showStorageWarning(message) {
+    storageMessage = message || '';
+    warningEl.textContent = storageMessage;
+    warningEl.classList.toggle('show', !!storageMessage);
+  }
+  function makeId() {
+    if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'n-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function normalizeNote(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const x = Number(raw.x), y = Number(raw.y);
+    const content = typeof raw.content === 'string' ? raw.content : (typeof raw.text === 'string' ? raw.text : '');
+    if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 100 || y < 0 || y > 100) return null;
+    if (!content.trim() || content.length > 300) return null;
+    const nickname = typeof raw.nickname === 'string' ? raw.nickname.trim().slice(0,12) : '';
+    const touches = Number.isFinite(Number(raw.touches)) ? Math.max(0, Math.floor(Number(raw.touches))) : 0;
+    const validColors = COLORS.includes(raw.color) ? raw.color : COLORS[0];
+    const createdAt = Number.isFinite(Number(raw.createdAt)) ? Number(raw.createdAt) : Date.now();
+    return {id: typeof raw.id === 'string' && raw.id ? raw.id : makeId(), x, y, content:content.trim(), nickname, createdAt, touches, color:validColors};
+  }
+  function parseStored(raw) {
+    const parsed = JSON.parse(raw);
+    const list = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.notes) ? parsed.notes : null);
+    if (!list) throw new Error('数据格式不符合预期');
+    const result = [];
+    for (const item of list) {
+      const normalized = normalizeNote(item);
+      if (!normalized) throw new Error('备份中包含无效便签，已停止导入以保护现有数据');
+      result.push(normalized);
+    }
+    return result;
+  }
+  function loadNotes() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw === null) { notes = []; return; }
+      notes = parseStored(raw);
+    } catch (err) {
+      notes = [];
+      storageReady = false;
+      showStorageWarning('无法安全读取本地便签，已暂停自动保存以免覆盖旧数据。请尝试导入之前的 JSON 备份，或先检查浏览器存储设置。');
+      console.error('Phoenix notes load error:', err);
+    }
+  }
+  function persist(nextNotes) {
+    if (!storageReady) {
+      toast('为保护原有数据，当前已暂停保存。请先处理存储提示或导出备份。');
+      return false;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({version:1, notes:nextNotes}));
+      notes = nextNotes;
+      return true;
+    } catch (err) {
+      storageReady = false;
+      showStorageWarning('浏览器保存失败，可能是存储不可用或空间不足。当前修改未确认保存，请导出备份并避免关闭页面。');
+      toast('保存失败：没有把这次修改当作已保存');
+      console.error('Phoenix notes save error:', err);
+      return false;
+    }
+  }
+  function formatTime(value) {
+    const d = new Date(value);
+    if (!Number.isFinite(d.getTime())) return '时间未知';
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 60 && diff >= 0) return '刚刚';
+    if (diff < 3600 && diff >= 0) return Math.floor(diff / 60) + ' 分钟前';
+    if (diff < 86400 && diff >= 0) return Math.floor(diff / 3600) + ' 小时前';
+    if (diff < 604800 && diff >= 0) return Math.floor(diff / 86400) + ' 天前';
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+  }
+  function applyTransform() {
+    layer.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    layer.querySelectorAll('.marker').forEach(el => el.style.setProperty('--marker-scale', String(1 / scale)));
+  }
+  function clampTranslate() {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const sw = MAP_WIDTH * scale, sh = MAP_HEIGHT * scale;
+    // 保留至少一条可拖动边缘；当地图小于视口时保持居中。
+    tx = sw <= vw ? (vw - sw) / 2 : Math.min(0, Math.max(vw - sw, tx));
+    ty = sh <= vh ? (vh - sh) / 2 : Math.min(0, Math.max(vh - sh, ty));
+  }
+  function fitMap() {
+    const vw = viewport.clientWidth || window.innerWidth, vh = viewport.clientHeight || window.innerHeight;
+    scale = Math.min(vw / MAP_WIDTH, vh / MAP_HEIGHT) * 1.04;
+    scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
+    tx = (vw - MAP_WIDTH * scale) / 2;
+    ty = (vh - MAP_HEIGHT * scale) / 2;
+    clampTranslate(); applyTransform();
+  }
+  function renderMarkers() {
+    layer.querySelectorAll('.marker').forEach(el => el.remove());
+    for (const note of notes) {
+      const el = document.createElement('button');
+      el.type = 'button'; el.className = 'marker'; el.dataset.id = note.id;
+      el.dataset.color = COLORS.includes(note.color) ? note.color : COLORS[0];
+      el.style.left = (note.x / 100 * MAP_WIDTH) + 'px';
+      el.style.top = (note.y / 100 * MAP_HEIGHT) + 'px';
+      el.setAttribute('aria-label', '阅读便签：' + note.content.slice(0, 24));
+      const flower = document.createElement('span'); flower.className = 'marker-flower'; flower.textContent = '✿';
+      el.appendChild(flower);
+      el.addEventListener('click', event => { event.stopPropagation(); openRead(note.id); });
+      layer.appendChild(el);
+    }
+    $('noteCount').textContent = String(notes.length);
+    $('panelCopy').textContent = notes.length
+      ? '地图上已经有一些记忆。继续探索，或把你想留住的瞬间放在熟悉的角落。'
+      : '拖动地图，找一个熟悉的角落。轻点地图空白处，就能留下一张便签。';
+  }
+  function openOverlay(id) { $(id).classList.add('show'); }
+  function closeOverlay(id) { $(id).classList.remove('show'); }
+  function openAdd(x, y) {
+    if (!storageReady) { toast('当前保存功能暂停中，请先处理存储提示'); return; }
+    pendingAddPos = {x:Math.max(0,Math.min(100,x)), y:Math.max(0,Math.min(100,y))};
+    $('noteContent').value = ''; $('noteNickname').value = ''; $('charCount').textContent = '0 / 300';
+    openOverlay('addOverlay');
+    setTimeout(() => $('noteContent').focus({preventScroll:true}), 250);
+  }
+  function closeAdd() { closeOverlay('addOverlay'); pendingAddPos = null; }
+  function openRead(id) {
+    const note = notes.find(n => n.id === id); if (!note) return;
+    currentReadId = id;
+    $('readNickname').textContent = note.nickname || '匿名同学';
+    $('readTime').textContent = formatTime(note.createdAt);
+    $('readContent').textContent = note.content;
+    $('touchCount').textContent = String(note.touches || 0);
+    $('deleteBtn').disabled = !storageReady;
+    openOverlay('readOverlay');
+  }
+  function closeRead() { closeOverlay('readOverlay'); currentReadId = null; }
+  function saveNewNote() {
+    const content = $('noteContent').value.trim();
+    if (!content) { $('noteContent').focus(); toast('写下一点内容，再把它留在这里吧'); return; }
+    if (content.length > 300 || !pendingAddPos) { toast('便签内容或位置无效，请重试'); return; }
+    const note = {id:makeId(), x:pendingAddPos.x, y:pendingAddPos.y, content,
+      nickname:$('noteNickname').value.trim().slice(0,12), createdAt:Date.now(), touches:0,
+      color:COLORS[Math.floor(Math.random()*COLORS.length)]};
+    const next = [...notes, note];
+    if (persist(next)) { renderMarkers(); closeAdd(); toast('这段记忆，已经留在这里了'); }
+  }
+  function deleteCurrentNote() {
+    if (!currentReadId) return;
+    if (!confirm('确定删除这张本地便签吗？此操作无法撤销。')) return;
+    const next = notes.filter(n => n.id !== currentReadId);
+    if (persist(next)) { closeRead(); renderMarkers(); toast('便签已删除'); }
+  }
+  function touchCurrentNote() {
+    if (!currentReadId) return;
+    const current = notes.find(n => n.id === currentReadId); if (!current) return;
+    const next = notes.map(n => n.id === currentReadId ? {...n, touches:(n.touches||0)+1} : n);
+    if (persist(next)) { $('touchCount').textContent = String(current.touches + 1); }
+  }
+  function downloadText(filename, content) {
+    const blob = new Blob([content], {type:'application/json;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportBackup() {
+    let payload = {version:1, exportedAt:new Date().toISOString(), notes};
+    try {
+      // 若读取异常，尽量允许用户导出原始存储字符串作为抢救材料。
+      if (!storageReady) {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw !== null) {
+          downloadText('phoenix-flower-raw-backup.json', raw);
+          toast('已导出原始存储内容，请保留该文件');
+          return;
+        }
+      }
+    } catch (_) {}
+    downloadText('phoenix-flower-backup.json', JSON.stringify(payload, null, 2));
+    toast('备份文件已生成');
+  }
+  async function importBackup(file) {
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const imported = parseStored(text);
+      const byId = new Map(notes.map(n => [n.id,n]));
+      for (const note of imported) if (!byId.has(note.id)) byId.set(note.id, note);
+      const merged = Array.from(byId.values());
+      if (!confirm(`备份中有 ${imported.length} 张便签。合并后共 ${merged.length} 张，是否继续？`)) return;
+      // 若旧存储损坏，用户明确选择导入后允许用有效数据重建存储。
+      const oldReady = storageReady; storageReady = true;
+      if (persist(merged)) {
+        showStorageWarning('备份已导入并合并。建议再次导出一份新备份。');
+        renderMarkers(); toast('备份恢复成功');
+      } else {
+        storageReady = oldReady;
+      }
+    } catch (err) {
+      toast(err && err.message ? err.message : '无法读取该备份文件');
+    } finally {
+      $('importFile').value = '';
+    }
+  }
+
+  function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+  function midpoint(a,b){return {x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+  function getPoint(e){return {x:e.clientX,y:e.clientY}}
+  function beginPointer(e) {
+    if (e.target.closest('.marker') || e.target.closest('.overlay') || e.target.closest('button')) return;
+    e.preventDefault();
+    try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+    pointers.set(e.pointerId, getPoint(e));
+    if (pointers.size === 1) {
+      const p = getPoint(e);
+      gesture = {type:'pan', start:p, last:p, tx, ty, moved:false};
+      moved = false;
+    } else if (pointers.size === 2) {
+      const pts = Array.from(pointers.values());
+      const mid = midpoint(pts[0],pts[1]);
+      gesture = {type:'pinch', startDistance:Math.max(1,dist(pts[0],pts[1])), startScale:scale,
+        startMid:mid, startTx:tx, startTy:ty, moved:true};
+      moved = true;
+      viewport.classList.add('is-dragging');
+    }
+  }
+  function movePointer(e) {
+    if (!pointers.has(e.pointerId)) return;
+    e.preventDefault();
+    pointers.set(e.pointerId,getPoint(e));
+    if (pointers.size === 1 && gesture && gesture.type === 'pan') {
+      const p = getPoint(e), dx = p.x - gesture.start.x, dy = p.y - gesture.start.y;
+      if (Math.hypot(dx,dy) > CLICK_THRESHOLD) { gesture.moved = true; moved = true; viewport.classList.add('is-dragging'); }
+      if (gesture.moved) {
+        tx = gesture.tx + dx; ty = gesture.ty + dy; clampTranslate(); applyTransform();
+      }
+    } else if (pointers.size >= 2 && gesture) {
+      const pts = Array.from(pointers.values()).slice(0,2), mid = midpoint(pts[0],pts[1]);
+      const ratio = dist(pts[0],pts[1]) / gesture.startDistance;
+      const nextScale = Math.max(MIN_SCALE,Math.min(MAX_SCALE,gesture.startScale * ratio));
+      // 以起始双指中点对应的地图坐标为锚点，缩放时尽量保持内容跟手。
+      const anchorX = (gesture.startMid.x - gesture.startTx) / gesture.startScale;
+      const anchorY = (gesture.startMid.y - gesture.startTy) / gesture.startScale;
+      scale = nextScale; tx = mid.x - anchorX * scale; ty = mid.y - anchorY * scale;
+      clampTranslate(); applyTransform(); moved = true;
+    }
+  }
+  function endPointer(e) {
+    if (!pointers.has(e.pointerId)) return;
+    const wasCancelled = e.type === 'pointercancel' || e.type === 'lostpointercapture';
+    const wasOne = pointers.size === 1;
+    const point = getPoint(e);
+    pointers.delete(e.pointerId);
+    if (pointers.size === 0) {
+      const shouldAdd = !wasCancelled && wasOne && gesture && gesture.type === 'pan' && !gesture.moved &&
+        Math.hypot(point.x-gesture.start.x, point.y-gesture.start.y) <= CLICK_THRESHOLD;
+      viewport.classList.remove('is-dragging');
+      gesture = null; moved = false;
+      if (shouldAdd) {
+        const rect = viewport.getBoundingClientRect();
+        const mapX = (point.x - tx) / scale;
+        const mapY = (point.y - ty) / scale;
+        if (mapX >= 0 && mapX <= MAP_WIDTH && mapY >= 0 && mapY <= MAP_HEIGHT) {
+          openAdd(mapX / MAP_WIDTH * 100, mapY / MAP_HEIGHT * 100);
+        }
+      }
+    } else if (pointers.size === 1) {
+      // 双指缩放结束后，不把剩余手指的移动误判为一次新的点击。
+      const remaining = Array.from(pointers.values())[0];
+      gesture = {type:'pan', start:remaining, last:remaining, tx, ty, moved:true};
+      moved = true;
+    }
+    try { if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+  }
+  viewport.addEventListener('pointerdown',beginPointer,{passive:false});
+  viewport.addEventListener('pointermove',movePointer,{passive:false});
+  viewport.addEventListener('pointerup',endPointer);
+  viewport.addEventListener('pointercancel',endPointer);
+  viewport.addEventListener('lostpointercapture',endPointer);
+  $('zoomIn').addEventListener('click',()=>zoomAt(viewport.clientWidth/2,viewport.clientHeight/2,1.25));
+  $('zoomOut').addEventListener('click',()=>zoomAt(viewport.clientWidth/2,viewport.clientHeight/2,1/1.25));
+  function zoomAt(px,py,factor){
+    const next = Math.max(MIN_SCALE,Math.min(MAX_SCALE,scale*factor));
+    const ax=(px-tx)/scale, ay=(py-ty)/scale;
+    scale=next;tx=px-ax*scale;ty=py-ay*scale;clampTranslate();applyTransform();
+  }
+  $('resetMap').addEventListener('click',fitMap);
+  $('addHint').addEventListener('click',()=>{
+    // 按钮入口将便签放在当前视口中心对应的底图位置。
+    const x=(viewport.clientWidth/2-tx)/scale, y=(viewport.clientHeight/2-ty)/scale;
+    if(x>=0&&x<=MAP_WIDTH&&y>=0&&y<=MAP_HEIGHT) openAdd(x/MAP_WIDTH*100,y/MAP_HEIGHT*100);
+    else {fitMap();toast('已回到地图全景，再选择一个位置吧');}
+  });
+  $('viewAll').addEventListener('click',()=>openOverlay('rulesOverlay'));
+  $('rulesBtn').addEventListener('click',()=>openOverlay('rulesOverlay'));
+  $('backupBtn').addEventListener('click',()=>openOverlay('backupOverlay'));
+  $('cancelAdd').addEventListener('click',closeAdd); $('closeAddX').addEventListener('click',closeAdd);
+  $('submitAdd').addEventListener('click',saveNewNote);
+  $('noteContent').addEventListener('input',()=>{$('charCount').textContent=$('noteContent').value.length+' / 300';});
+  $('closeRead').addEventListener('click',closeRead); $('closeReadX').addEventListener('click',closeRead);
+  $('deleteBtn').addEventListener('click',deleteCurrentNote); $('touchBtn').addEventListener('click',touchCurrentNote);
+  $('closeRules').addEventListener('click',()=>closeOverlay('rulesOverlay')); $('closeRulesX').addEventListener('click',()=>closeOverlay('rulesOverlay'));
+  $('closeBackup').addEventListener('click',()=>closeOverlay('backupOverlay')); $('closeBackupX').addEventListener('click',()=>closeOverlay('backupOverlay'));
+  $('exportBtn').addEventListener('click',exportBackup);
+  $('importBtn').addEventListener('click',()=>$('importFile').click());
+  $('importFile').addEventListener('change',e=>importBackup(e.target.files && e.target.files[0]));
+  ['addOverlay','readOverlay','rulesOverlay','backupOverlay'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeOverlay(id)}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAdd();closeRead();closeOverlay('rulesOverlay');closeOverlay('backupOverlay')}});
+  window.addEventListener('resize',()=>{clampTranslate();applyTransform()});
+  if ('ResizeObserver' in window) new ResizeObserver(()=>{clampTranslate();applyTransform()}).observe(viewport);
+
+  // 初始化：优先保留现有仓库的校园底图与旧版 phoenix_notes 数据。
+  loadNotes();
+  renderMarkers();
+  mapImg.addEventListener('load',()=>{fitMap();applyTransform()},{once:true});
+  mapImg.addEventListener('error',()=>{showStorageWarning('校园底图加载失败。请确认 IMG_4772.jpeg 仍与 index.html 位于同一目录。');fitMap()},{once:true});
+  if (mapImg.complete) fitMap();
+  else { fitMap(); }
+})();
+</script>
+</body>
+</html>
