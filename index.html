@@ -99,7 +99,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* Entrance sequence */
+/* Entrance sequence: added without changing the existing map or note storage. */
 #phoenix-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overflow:hidden;background:#18251f;color:#f5efe4;isolation:isolate}
 #phoenix-intro[hidden]{display:none}
 .intro-photos,.intro-shade{position:absolute;inset:0}
@@ -126,7 +126,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 #phoenix-intro.leaving{opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s}
 @media(prefers-reduced-motion:reduce){.intro-photo{animation:none;opacity:0;transform:none}.intro-photo:first-child{opacity:1}#phoenix-intro *{transition:none!important;animation:none!important}}
 
-/* Iteration: location index, menu, and bookmark */
+
+/* Iteration 3: quiet index, location fly-to, menu, and bookmark preview. */
 .top-actions{gap:6px}
 .icon-btn.menu-trigger{font-size:20px;font-weight:500}
 .intro-photo{animation:none;opacity:0;transition:opacity .65s ease;transform:scale(1.02)}
@@ -164,6 +165,37 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .bookmark-controls button{flex:1}
 @media(max-width:420px){.top-actions #rulesBtn,.top-actions #backupBtn{display:none}.top-actions{gap:5px}.brand{gap:7px}.brand-copy h1{font-size:15px;letter-spacing:.04em}.brand-copy p{font-size:10px}.brand-mark{width:34px;height:34px;font-size:18px}.icon-btn{width:35px;height:35px}}
 @media(max-width:380px){.index-grid{grid-template-columns:1fr}.bookmark-image{height:220px}}
+
+
+/* Supabase announcement bar: isolated from the existing map UI. */
+#announcementBar{position:absolute;z-index:90;top:0;left:0;right:0;display:none;align-items:flex-start;gap:12px;padding:calc(8px + env(safe-area-inset-top,0px)) 14px 9px;background:#d97735;color:#fffaf2;box-shadow:0 4px 14px rgba(69,39,18,.16);}
+#announcementBar.is-visible{display:flex}
+#announcementBar .announcement-mark{flex:0 0 auto;font-size:15px;line-height:1.5}
+#announcementBar .announcement-copy{flex:1;min-width:0;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+#announcementBar .announcement-title{font-weight:750;font-size:13px;margin-right:7px}
+#announcementBar .announcement-content{font-weight:450}
+#announcementClose{flex:0 0 auto;width:28px;height:28px;margin:-3px -4px 0 0;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fffaf2;font-size:22px;line-height:1;display:grid;place-items:center}
+#announcementClose:active{background:rgba(255,255,255,.28)}
+body.has-announcement .topbar{top:calc(var(--announcement-height, 0px) - env(safe-area-inset-top,0px))}
+body.has-announcement .welcome{top:calc(94px + var(--announcement-height, 0px))}
+@media(min-width:700px){body.has-announcement .welcome{top:calc(130px + var(--announcement-height, 0px))}}
+@media(max-height:680px){body.has-announcement .welcome{top:calc(85px + var(--announcement-height, 0px))}}
+
+
+/* Account access: email registration and login */
+.account-card{border:1px solid #eadac9;background:linear-gradient(135deg,#fff8ed,#f7eadb);border-radius:16px;padding:13px;margin:12px 0 16px}
+.account-status{font-size:12px;line-height:1.65;color:#78685b;margin:0 0 10px;overflow-wrap:anywhere}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap}
+.account-actions button{flex:1;min-width:105px;min-height:40px;border:0;border-radius:12px;padding:8px 11px;font-size:12px;font-weight:650}
+.account-primary{background:var(--terra);color:#fffaf2}.account-secondary{background:#efe2d2;color:#59483b}
+.auth-hint{font-size:12px;line-height:1.65;color:#8b7765;margin:9px 0 0}
+.auth-message{display:none;border-radius:12px;padding:10px 12px;margin:12px 0 4px;font-size:12px;line-height:1.65;overflow-wrap:anywhere;background:#f3eadb;color:#6d533c}
+.auth-message.show{display:block}.auth-message.error{background:#f9e2dc;color:#8b3f30}.auth-message.success{background:#e6eddf;color:#49613f}
+.auth-switch{border:0;background:transparent;color:var(--terra-dark);font-size:12px;padding:10px 4px;text-decoration:underline;text-underline-offset:3px}
+.auth-password-wrap{position:relative}.auth-password-wrap input{padding-right:48px!important}.auth-password-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:#f0e7db;color:#6e5b4b;border-radius:8px;padding:6px 8px;font-size:11px}
+#authOverlay .modal{padding-bottom:22px}
+#authOverlay [hidden],.account-actions[hidden]{display:none!important}
+
 </style>
 </head>
 <body>
@@ -187,6 +219,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 </div>
 
 <div id="app">
+  <aside id="announcementBar" aria-label="网站公告" aria-live="polite" aria-hidden="true">
+    <span class="announcement-mark" aria-hidden="true">✦</span>
+    <div class="announcement-copy"><span class="announcement-title" id="announcementTitle"></span><span class="announcement-content" id="announcementContent"></span></div>
+    <button id="announcementClose" type="button" aria-label="关闭公告" title="关闭公告">×</button>
+  </aside>
+
   <div id="map-viewport" aria-label="校园记忆地图，拖动探索，点击空白位置创建便签">
     <div id="map-layer">
       <img id="map-img" src="IMG_4772.jpeg" alt="校园平面图" draggable="false">
@@ -310,6 +348,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   <div class="overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
     <div class="modal">
       <div class="modal-head"><div><div class="modal-kicker">A PLACE FOR OUR MEMORIES</div><h3 id="menuTitle">把记忆慢慢收好</h3></div><button class="close-btn" data-close="menuOverlay" aria-label="关闭">×</button></div>
+      <section class="account-card" aria-label="账号">
+        <p class="account-status" id="accountStatus">尚未登录。注册后可使用逐步开放的账号功能；当前本地便签仍保存在本设备。</p>
+        <div class="account-actions" id="accountActions">
+          <button class="account-primary" id="openLoginBtn" type="button">登录</button>
+          <button class="account-secondary" id="openSignupBtn" type="button">创建账号</button>
+        </div>
+        <div class="account-actions" id="signedInActions" hidden>
+          <button class="account-secondary" id="refreshAccountBtn" type="button">刷新账号状态</button>
+          <button class="account-primary" id="signOutBtn" type="button">退出登录</button>
+        </div>
+      </section>
       <div class="menu-section-title">关于与原则</div><div class="menu-list" id="menuAbout"></div>
       <div class="menu-section-title">发现与珍藏</div><div class="menu-list" id="menuDiscover"></div>
       <div class="menu-section-title">参与共建</div><div class="menu-list" id="menuBuild"></div>
@@ -378,6 +427,156 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   </div>
 </div>
 
+<div class="overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-kicker">YOUR PLACE IN OUR MEMORIES</div><h3 id="authTitle">登录账号</h3></div>
+      <button class="close-btn" id="authCloseBtn" type="button" aria-label="关闭">×</button>
+    </div>
+    <p class="panel-copy" id="authIntro">欢迎回来。使用邮箱和密码登录。</p>
+    <form id="authForm" novalidate>
+      <div class="field" id="authEmailField"><label for="authEmail">邮箱</label><input id="authEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" maxlength="254" required></div>
+      <div class="field" id="authPasswordField"><label for="authPassword">密码 <span id="authPasswordHint">至少 8 位</span></label><div class="auth-password-wrap"><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="请输入密码" required><button class="auth-password-toggle" type="button" data-toggle-password="authPassword">显示</button></div></div>
+      <div class="field" id="authConfirmField" hidden><label for="authConfirmPassword">确认密码</label><div class="auth-password-wrap"><input id="authConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="再次输入密码"><button class="auth-password-toggle" type="button" data-toggle-password="authConfirmPassword">显示</button></div></div>
+      <div class="field" id="authNewPasswordField" hidden><label for="authNewPassword">新密码 <span>至少 8 位</span></label><div class="auth-password-wrap"><input id="authNewPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="设置新密码"><button class="auth-password-toggle" type="button" data-toggle-password="authNewPassword">显示</button></div></div>
+      <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
+      <button class="primary-btn" id="authSubmitBtn" type="submit" style="width:100%;margin-top:12px">登录</button>
+    </form>
+    <div class="modal-actions" id="authSwitchActions"><button class="auth-switch" id="switchToSignup" type="button">创建新账号</button><button class="auth-switch" id="switchToLogin" type="button" hidden>返回登录</button><button class="auth-switch" id="forgotPasswordBtn" type="button">忘记密码？</button></div>
+    <p class="auth-hint" id="authFootnote">注册后，Supabase 会向你的邮箱发送验证邮件。请通过邮件中的链接完成验证，再回来登录。</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function initPhoenixAuth(){
+  'use strict';
+  const PROJECT_URL = 'https://motvdvgoeucqxnvmehmi.supabase.co';
+  const PUBLISHABLE_KEY = 'sb_publishable__yCfZDd3hByMDC4AOLtqoQ_lfIcy5mm';
+  const SITE_URL = 'https://aaa-pifa.github.io/phoenix-flower/';
+  const $ = id => document.getElementById(id);
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    $('accountStatus').textContent = '账号服务暂时无法加载，请检查网络后刷新页面。';
+    return;
+  }
+  const client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+  let mode = 'login';
+  let busy = false;
+  let recoveryMode = false;
+
+  function message(text, kind='') {
+    const el=$('authMessage'); el.textContent=text; el.className='auth-message show'+(kind?' '+kind:'');
+  }
+  function clearMessage(){const el=$('authMessage');el.textContent='';el.className='auth-message';}
+  function setBusy(value){busy=value;$('authSubmitBtn').disabled=value;$('authSubmitBtn').textContent=value?'请稍候…':submitLabel();}
+  function submitLabel(){return ({login:'登录',signup:'创建账号',forgot:'发送重置邮件',recovery:'保存新密码'})[mode]||'继续';}
+  function setMode(next){
+    mode=next; clearMessage();
+    const isSignup=next==='signup', isForgot=next==='forgot', isRecovery=next==='recovery';
+    $('authTitle').textContent=({login:'登录账号',signup:'创建账号',forgot:'重置密码',recovery:'设置新密码'})[next];
+    $('authIntro').textContent=({login:'欢迎回来。使用邮箱和密码登录。',signup:'创建账号后，请通过邮箱验证链接完成验证。',forgot:'输入注册邮箱，我们会发送密码重置邮件。',recovery:'请设置一个新的登录密码。'})[next];
+    $('authPasswordField').hidden=isForgot||isRecovery;
+    $('authConfirmField').hidden=!isSignup;
+    $('authNewPasswordField').hidden=!isRecovery;
+    $('authEmailField').hidden=isRecovery;
+    $('authPassword').required=!isForgot&&!isRecovery;
+    $('authConfirmPassword').required=isSignup;
+    $('authNewPassword').required=isRecovery;
+    $('authPassword').autocomplete=isSignup?'new-password':'current-password';
+    $('authSwitchActions').hidden=isRecovery;
+    $('switchToSignup').hidden=next!=='login';
+    $('switchToLogin').hidden=next!=='signup'&&next!=='forgot';
+    $('forgotPasswordBtn').hidden=next!=='login';
+    $('authFootnote').textContent=isSignup?'请使用可正常收信的邮箱。注册后需要点击验证邮件中的链接，才能完成邮箱验证。':isForgot?'如果邮箱已注册且邮件服务正常，你会收到密码重置邮件。':isRecovery?'保存后即可使用新密码登录。':'如果你尚未注册，请先创建账号；若开启邮箱验证，需要先验证邮箱再登录。';
+    $('authSubmitBtn').textContent=submitLabel();
+    $('authPassword').value='';$('authConfirmPassword').value='';$('authNewPassword').value='';
+    $('authEmail').setAttribute('autocomplete','email');
+  }
+  function openAuth(next='login'){
+    recoveryMode=next==='recovery'; setMode(next); overlay.classList.add('show');
+    setTimeout(()=>{const target=next==='recovery'?'authNewPassword':'authEmail';$(target)?.focus({preventScroll:true});},180);
+  }
+  function closeAuth(){overlay.classList.remove('show');clearMessage();}
+  function renderAccount(user){
+    const status=$('accountStatus'), signed=!!user;
+    $('accountActions').hidden=signed; $('signedInActions').hidden=!signed;
+    if(user){
+      status.textContent='已登录：'+(user.email||'邮箱账号')+'。当前版本的便签仍保存在本设备，云端同步功能会在后续阶段接入。';
+    }else{
+      status.textContent='尚未登录。注册后可使用逐步开放的账号功能；当前本地便签仍保存在本设备。';
+    }
+  }
+  async function refreshSession(){
+    try{const {data,error}=await client.auth.getSession();if(error)throw error;renderAccount(data.session?.user||null);return data.session;}
+    catch(e){renderAccount(null);console.warn('Account session could not be restored:',e.message);return null;}
+  }
+  $('openLoginBtn').addEventListener('click',()=>openAuth('login'));
+  $('openSignupBtn').addEventListener('click',()=>openAuth('signup'));
+  $('refreshAccountBtn').addEventListener('click',refreshSession);
+  $('authCloseBtn').addEventListener('click',closeAuth);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeAuth();});
+  $('switchToSignup').addEventListener('click',()=>setMode('signup'));
+  $('switchToLogin').addEventListener('click',()=>setMode('login'));
+  $('forgotPasswordBtn').addEventListener('click',()=>setMode('forgot'));
+  document.querySelectorAll('[data-toggle-password]').forEach(btn=>btn.addEventListener('click',()=>{
+    const field=$(btn.dataset.togglePassword);if(!field)return;const visible=field.type==='password';field.type=visible?'text':'password';btn.textContent=visible?'隐藏':'显示';
+  }));
+  $('signOutBtn').addEventListener('click',async()=>{
+    if(busy)return;const {error}=await client.auth.signOut();
+    if(error){message('退出登录失败，请稍后重试。','error');return;}
+    renderAccount(null);closeAuth();message('已退出登录。','success');
+  });
+  $('authForm').addEventListener('submit',async event=>{
+    event.preventDefault();if(busy)return;clearMessage();
+    const email=$('authEmail').value.trim();const password=$('authPassword').value;const confirm=$('authConfirmPassword').value;const newPassword=$('authNewPassword').value;
+    if((mode==='login'||mode==='signup'||mode==='forgot')&&!email){message('请输入邮箱地址。','error');return;}
+    if((mode==='login'||mode==='signup')&&password.length<8){message('密码至少需要 8 位。','error');return;}
+    if(mode==='signup'&&password!==confirm){message('两次输入的密码不一致，请重新确认。','error');return;}
+    if(mode==='recovery'&&newPassword.length<8){message('新密码至少需要 8 位。','error');return;}
+    setBusy(true);
+    try{
+      if(mode==='signup'){
+        const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:SITE_URL}});
+        if(error)throw error;
+        if(data.session){renderAccount(data.user);message('注册成功，账号已建立。','success');setTimeout(closeAuth,900);}
+        else{message('注册请求已提交。请检查邮箱并点击验证链接，再返回这里登录。如果没有收到邮件，请检查垃圾邮件文件夹。','success');setMode('login');message('验证邮件已请求发送，请先完成邮箱验证，再登录。','success');}
+      }else if(mode==='login'){
+        const {data,error}=await client.auth.signInWithPassword({email,password});
+        if(error){if(/email not confirmed/i.test(error.message))throw new Error('邮箱尚未验证。请先点击注册时收到的验证邮件链接。');throw error;}
+        renderAccount(data.user);message('登录成功。','success');setTimeout(closeAuth,700);
+      }else if(mode==='forgot'){
+        const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:SITE_URL});if(error)throw error;
+        message('如果该邮箱已注册，系统会发送密码重置邮件。请查看收件箱及垃圾邮件文件夹。','success');
+      }else if(mode==='recovery'){
+        const {data,error}=await client.auth.updateUser({password:newPassword});if(error)throw error;
+        renderAccount(data.user);message('密码已更新。请妥善保管新密码。','success');setTimeout(closeAuth,1000);
+      }
+    }catch(error){
+      let text=error&&error.message?error.message:'操作失败，请稍后重试。';
+      if(/invalid login credentials/i.test(text))text='邮箱或密码不正确，请检查后重试。';
+      else if(/user already registered/i.test(text))text='这个邮箱已经注册，请直接登录或使用忘记密码功能。';
+      else if(/password should be at least/i.test(text))text='密码长度未达到要求，请设置至少 8 位的密码。';
+      else if(/rate limit|too many requests/i.test(text))text='操作过于频繁，请稍后再试。';
+      message(text,'error');
+    }finally{setBusy(false);}
+  });
+  client.auth.onAuthStateChange((event,session)=>{
+    renderAccount(session?.user||null);
+    if(event==='PASSWORD_RECOVERY'){openAuth('recovery');message('请设置一个新的登录密码。','success');}
+  });
+  $('menuBtn')?.addEventListener('click',()=>{refreshSession();});
+  refreshSession();
+  // Support password-reset links that return to this page with an active recovery session.
+  if(window.location.hash.includes('type=recovery')||new URLSearchParams(window.location.search).get('auth')==='recovery'){
+    setTimeout(()=>{if(!recoveryMode)openAuth('recovery');},500);
+  }
+})();
+</script>
+
 <script>
 (() => {
   'use strict';
@@ -431,7 +630,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       });
     }
   }
-
   const viewport = $('map-viewport'), layer = $('map-layer'), mapImg = $('map-img');
   const toastEl = $('toast'), warningEl = $('storageWarning');
   let notes = [], scale = 1, tx = 0, ty = 0;
@@ -524,6 +722,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   function clampTranslate() {
     const vw = viewport.clientWidth, vh = viewport.clientHeight;
     const sw = MAP_WIDTH * scale, sh = MAP_HEIGHT * scale;
+    // 保留至少一条可拖动边缘；当地图小于视口时保持居中。
     tx = sw <= vw ? (vw - sw) / 2 : Math.min(0, Math.max(vw - sw, tx));
     ty = sh <= vh ? (vh - sh) / 2 : Math.min(0, Math.max(vh - sh, ty));
   }
@@ -607,6 +806,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   function exportBackup() {
     let payload = {version:1, exportedAt:new Date().toISOString(), notes};
     try {
+      // 若读取异常，尽量允许用户导出原始存储字符串作为抢救材料。
       if (!storageReady) {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw !== null) {
@@ -628,6 +828,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       for (const note of imported) if (!byId.has(note.id)) byId.set(note.id, note);
       const merged = Array.from(byId.values());
       if (!confirm(`备份中有 ${imported.length} 张便签。合并后共 ${merged.length} 张，是否继续？`)) return;
+      // 若旧存储损坏，用户明确选择导入后允许用有效数据重建存储。
       const oldReady = storageReady; storageReady = true;
       if (persist(merged)) {
         showStorageWarning('备份已导入并合并。建议再次导出一份新备份。');
@@ -677,6 +878,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       const pts = Array.from(pointers.values()).slice(0,2), mid = midpoint(pts[0],pts[1]);
       const ratio = dist(pts[0],pts[1]) / gesture.startDistance;
       const nextScale = Math.max(MIN_SCALE,Math.min(MAX_SCALE,gesture.startScale * ratio));
+      // 以起始双指中点对应的地图坐标为锚点，缩放时尽量保持内容跟手。
       const anchorX = (gesture.startMid.x - gesture.startTx) / gesture.startScale;
       const anchorY = (gesture.startMid.y - gesture.startTy) / gesture.startScale;
       scale = nextScale; tx = mid.x - anchorX * scale; ty = mid.y - anchorY * scale;
@@ -695,6 +897,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
       viewport.classList.remove('is-dragging');
       gesture = null; moved = false;
       if (shouldAdd) {
+        const rect = viewport.getBoundingClientRect();
         const mapX = (point.x - tx) / scale;
         const mapY = (point.y - ty) / scale;
         if (mapX >= 0 && mapX <= MAP_WIDTH && mapY >= 0 && mapY <= MAP_HEIGHT) {
@@ -702,6 +905,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
         }
       }
     } else if (pointers.size === 1) {
+      // 双指缩放结束后，不把剩余手指的移动误判为一次新的点击。
       const remaining = Array.from(pointers.values())[0];
       gesture = {type:'pan', start:remaining, last:remaining, tx, ty, moved:true};
       moved = true;
@@ -722,6 +926,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   }
   $('resetMap').addEventListener('click',fitMap);
   $('addHint').addEventListener('click',()=>{
+    // 按钮入口将便签放在当前视口中心对应的底图位置。
     const x=(viewport.clientWidth/2-tx)/scale, y=(viewport.clientHeight/2-ty)/scale;
     if(x>=0&&x<=MAP_WIDTH&&y>=0&&y<=MAP_HEIGHT) openAdd(x/MAP_WIDTH*100,y/MAP_HEIGHT*100);
     else {fitMap();toast('已回到地图全景，再选择一个位置吧');}
@@ -744,6 +949,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   window.addEventListener('resize',()=>{clampTranslate();applyTransform()});
   if ('ResizeObserver' in window) new ResizeObserver(()=>{clampTranslate();applyTransform()}).observe(viewport);
 
+  // Data-driven campus places. Coordinates are relative to the 1500 × 2441 base map.
   const CAMPUS_PLACES = [
     {id:'west-gate',name:'西侧校门',category:'校门',symbol:'⌂',x:7,y:59,desc:'日常出入的校门。'},
     {id:'track',name:'田径场',category:'运动区',symbol:'🏃',x:66,y:15,desc:'蓝色跑道与足球场，是校园里最开阔的地方。'},
@@ -879,6 +1085,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     $('bookmarkSaveNote').textContent='书签预览已更新。当前只使用项目已有的入场照片；正式打卡编号将在云端接入后生成。';
   }
   async function saveBookmarkImage() {
+    const card=$('bookmarkCard');
+    // Native canvas export without external libraries: render a clean shareable card from the selected photo and text.
     try {
       const img=$('bookmarkImage');
       const canvas=document.createElement('canvas'); canvas.width=900; canvas.height=1500;
@@ -922,6 +1130,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   ['menuOverlay','timeOverlay','placeOverlay','photoWallOverlay','featureOverlay','bookmarkOverlay'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeOverlay(id)}));
   renderMenu(); renderPlaceChoices(); initTimeIndex();
 
+  // 初始化：优先保留现有仓库的校园底图与旧版 phoenix_notes 数据。
   loadNotes();
   renderMarkers();
   mapImg.addEventListener('load',()=>{fitMap();applyTransform()},{once:true});
@@ -930,5 +1139,94 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   else { fitMap(); }
 })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function initPhoenixAnnouncement(){
+  'use strict';
+  const PROJECT_URL = 'https://motvdvgoeucqxnvmehmi.supabase.co';
+  const PUBLISHABLE_KEY = 'sb_publishable__yCfZDd3hByMDC4AOLtqoQ_lfIcy5mm';
+  const bar = document.getElementById('announcementBar');
+  const titleEl = document.getElementById('announcementTitle');
+  const contentEl = document.getElementById('announcementContent');
+  const closeBtn = document.getElementById('announcementClose');
+  if (!bar || !titleEl || !contentEl || !closeBtn) return;
+
+  let resizeHandler = null;
+  function hideBar(){
+    bar.classList.remove('is-visible');
+    document.body.classList.remove('has-announcement');
+    document.documentElement.style.removeProperty('--announcement-height');
+    bar.setAttribute('aria-hidden','true');
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler);
+      if (window.visualViewport) window.visualViewport.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
+    }
+  }
+
+  function showBar(row){
+    const storageKey = 'phoenix_ann_dismissed_' + String(row.id);
+    try {
+      if (window.localStorage.getItem(storageKey) === '1') return;
+    } catch (e) {
+      // Storage may be unavailable; the announcement can still appear for this visit.
+    }
+
+    bar.dataset.storageKey = storageKey;
+    titleEl.textContent = row.title ? row.title + '：' : '';
+    contentEl.textContent = row.content || '';
+    bar.classList.add('is-visible');
+    bar.setAttribute('aria-hidden','false');
+    document.body.classList.add('has-announcement');
+
+    const updateHeight = () => {
+      if (!bar.classList.contains('is-visible')) return;
+      document.documentElement.style.setProperty(
+        '--announcement-height',
+        Math.ceil(bar.getBoundingClientRect().height) + 'px'
+      );
+    };
+    resizeHandler = updateHeight;
+    requestAnimationFrame(updateHeight);
+    window.addEventListener('resize', updateHeight, {passive:true});
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', updateHeight, {passive:true});
+  }
+
+  closeBtn.addEventListener('click', function(){
+    const currentKey = bar.dataset.storageKey;
+    if (currentKey) {
+      try { window.localStorage.setItem(currentKey, '1'); } catch (e) { /* Keep dismissal local to this view. */ }
+    }
+    hideBar();
+  });
+
+  async function loadAnnouncement(){
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.warn('Phoenix announcement: Supabase client library did not load.');
+      return;
+    }
+    try {
+      const client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
+      const {data, error} = await client
+        .from('announcements')
+        .select('id,title,content,is_active,created_at')
+        .eq('is_active', true)
+        .order('created_at', {ascending:false})
+        .order('id', {ascending:false})
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) showBar(data);
+    } catch (error) {
+      // Announcement failure must never stop the rest of the website.
+      console.warn('Phoenix announcement could not be loaded:', error && error.message ? error.message : error);
+    }
+  }
+
+  loadAnnouncement();
+})();
+</script>
+
 </body>
 </html>
